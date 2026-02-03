@@ -136,6 +136,7 @@ select {
     width: 100%;
     box-sizing: border-box;
     font-family: inherit;
+    font-size: 16px; /* Prevent iOS zoom on focus */
     outline: none;
     transition: border-color 0.2s;
 }
