@@ -1,73 +1,59 @@
-# React + TypeScript + Vite
+# MomComePickMeUp
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Taiwan railway train schedule app that helps you notify your mom when to pick you up from the station. Built with <a href="https://vite.dev/">Vite</a>, <a href="https://react.dev/">React</a>, and <a href="https://vercel.com/">Vercel</a>.
 
-Currently, two official plugins are available:
+The app shows real-time train schedules between stations, automatically suggests the next departing train, and provides a quick share feature to send pickup time messages. Perfect for daily commuters who need a simple way to coordinate rides home.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Real-time train schedules from TDX (Transport Data eXchange)
+- Auto-detect nearest station using geolocation
+- Smart suggestion of next departing train
+- Quick message sharing with customizable templates
+- PWA support for mobile installation
+- Dark mode optimized UI
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Installation (requires [Node.js](https://nodejs.org/) 20.x)
 
-## Expanding the ESLint configuration
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/MomComePickMeUp.git
+    ```
+2. Navigate to the project directory:
+    ```bash
+    cd MomComePickMeUp
+    ```
+3. Install dependencies:
+    ```bash
+    npm install
+    ```
+4. Set up environment variables:
+   Create a `.env` file with your TDX API credentials:
+    ```
+    VITE_TDX_CLIENT_ID=your_client_id
+    VITE_TDX_CLIENT_SECRET=your_client_secret
+    ```
+5. Run the development server:
+    ```bash
+    vercel dev
+    ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Building for production
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. Generate a production build:
+    ```bash
+    npm run build
+    ```
+2. Preview the site:
+    ```bash
+    npm run preview
+    ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Frontend**: React 19 + TypeScript
+- **Build Tool**: Vite 7
+- **Styling**: CSS with custom properties
+- **API**: TDX Taiwan Railway API
+- **Deployment**: Vercel with serverless functions
+- **Icons**: Lucide React
