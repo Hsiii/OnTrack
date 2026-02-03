@@ -9,7 +9,7 @@ import {
 import { api } from '../api/client';
 import type { TrainInfo } from '../types';
 import { Badge } from './Badge';
-import { LoadingSpinner } from './LoadingSpinner';
+import { TrainListSkeleton } from './TrainListSkeleton';
 
 import './TrainList.css';
 
@@ -152,10 +152,6 @@ export function TrainList({
         date.getTime() - lastFetchTime < 120000;
     const shouldShowLoading = loading && !hasRecentData;
 
-    if (shouldShowLoading) {
-        return <LoadingSpinner message='Loading schedule...' />;
-    }
-
     if (error)
         return (
             <div className='glass-panel train-list-error'>
@@ -169,15 +165,46 @@ export function TrainList({
             </div>
         );
 
-    if (trains.length === 0)
+    // Show skeleton if loading and no data yet
+    if (shouldShowLoading && trains.length === 0) {
+        return <TrainListSkeleton />;
+    }
+
+    if (!shouldShowLoading && trains.length === 0)
         return <div className='train-list-empty'>完了 回不了家了</div>;
 
     return (
         <div className='train-list-container'>
             <span className='label-dim'>選擇列車</span>
 
-            {trains.map((train) => {
-                const isSelected = train.trainNo === selectedTrainNo;
+            {(shouldShowLoading ? [1, 2, 3] : trains).map((train, idx) => {
+                if (shouldShowLoading) {
+                    // Render skeleton cards
+                    return (
+                        <div
+                            key={idx}
+                            className='glass-panel train-card skeleton-card'
+                        >
+                            <div className='train-card-left'>
+                                <div className='train-card-time-row'>
+                                    <span className='skeleton skeleton-time'></span>
+                                    <span className='train-card-arrow skeleton-arrow'>
+                                        ➔
+                                    </span>
+                                    <span className='skeleton skeleton-time'></span>
+                                </div>
+                                <div className='skeleton skeleton-details'></div>
+                            </div>
+                            <div className='train-card-right'>
+                                <span className='skeleton skeleton-badge'></span>
+                            </div>
+                        </div>
+                    );
+                }
+
+                // Render actual train data
+                const trainData = train as TrainInfo;
+                const isSelected = trainData.trainNo === selectedTrainNo;
                 const now = new Date();
                 const currentTimeStr = now.toLocaleTimeString('en-CA', {
                     hour12: false,
@@ -186,27 +213,28 @@ export function TrainList({
                     timeZone: 'Asia/Taipei',
                 });
                 const isNext =
-                    train.departureTime >= currentTimeStr &&
+                    trainData.departureTime >= currentTimeStr &&
                     !trains.some(
                         (t) =>
-                            t.departureTime >= currentTimeStr &&
-                            t.departureTime < train.departureTime
+                            (t as TrainInfo).departureTime >= currentTimeStr &&
+                            (t as TrainInfo).departureTime <
+                                trainData.departureTime
                     );
 
                 return (
                     <div
-                        key={train.trainNo}
+                        key={trainData.trainNo}
                         className={`glass-panel clickable-item train-card ${isSelected ? 'selected' : ''}`}
-                        onClick={() => onSelect(train)}
+                        onClick={() => onSelect(trainData)}
                     >
                         <div className='train-card-left'>
                             <div className='train-card-time-row'>
                                 <span className='train-card-departure-time'>
-                                    {train.departureTime}
+                                    {trainData.departureTime}
                                 </span>
                                 <span className='train-card-arrow'>➔</span>
                                 <span className='train-card-arrival-time'>
-                                    {train.arrivalTime}
+                                    {trainData.arrivalTime}
                                 </span>
                                 {isNext && (
                                     <Badge
@@ -218,20 +246,20 @@ export function TrainList({
                                 )}
                             </div>
                             <div className='train-card-details'>
-                                {parseTrainType(train.trainType)}{' '}
-                                {train.trainNo}
+                                {parseTrainType(trainData.trainType)}{' '}
+                                {trainData.trainNo}
                             </div>
                         </div>
                         <div className='train-card-right'>
                             <Badge
                                 variant={
-                                    train.status === 'delayed'
+                                    trainData.status === 'delayed'
                                         ? 'danger'
                                         : 'success'
                                 }
                             >
-                                {train.delay && train.delay > 0
-                                    ? `+${train.delay} min`
+                                {trainData.delay && trainData.delay > 0
+                                    ? `+${trainData.delay} min`
                                     : 'On Time'}
                             </Badge>
                         </div>

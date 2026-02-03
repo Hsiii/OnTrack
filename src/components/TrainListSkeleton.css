@@ -1,0 +1,52 @@
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-card {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.skeleton-label {
+    width: 80px;
+    height: 16px;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-time {
+    width: 50px;
+    height: 24px;
+}
+
+.skeleton-arrow {
+    opacity: 0.3;
+}
+
+.skeleton-details {
+    width: 120px;
+    height: 16px;
+    margin-top: 0.25rem;
+}
+
+.skeleton-badge {
+    width: 70px;
+    height: 24px;
+}
