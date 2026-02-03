@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import './App.css';
-import { usePersistence } from './hooks/usePersistence';
+
+import { api } from './api/client';
+import { ShareCard } from './components/ShareCard';
 import { StationSelector } from './components/StationSelector';
 import { TrainList } from './components/TrainList';
-import { ShareCard } from './components/ShareCard';
-import type { TrainInfo, Station } from './types';
-import { api } from './api/client';
+import { usePersistence } from './hooks/usePersistence';
+import type { Station, TrainInfo } from './types';
 
 function App() {
     const { originId, setOriginId, destId, setDestId } = usePersistence();
@@ -25,8 +27,8 @@ function App() {
     const destName = destStation?.name || destId;
 
     return (
-        <div className="app-container">
-            <main style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className='app-container'>
+            <main className='app-main'>
                 <StationSelector
                     stations={stations}
                     originId={originId}
@@ -45,11 +47,15 @@ function App() {
                 )}
 
                 {selectedTrain && (
-                    <ShareCard train={selectedTrain} originName={originName} destName={destName} />
+                    <ShareCard
+                        train={selectedTrain}
+                        originName={originName}
+                        destName={destName}
+                    />
                 )}
 
                 {(!originId || !destId) && (
-                    <div style={{ textAlign: 'center', opacity: 0.5, marginTop: '2rem' }}>
+                    <div className='app-placeholder'>
                         Select both stations to see upcoming trains.
                     </div>
                 )}

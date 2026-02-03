@@ -1,6 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
+
 import type { Station } from '../types';
+
+import './StationSelector.css';
 
 interface StationSelectorProps {
     stations: Station[];
@@ -123,19 +126,13 @@ export function StationSelector({
     const destStation = stations.find((s) => s.id === destId);
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-            }}
-        >
+        <div className='station-selector-container'>
             {/* Origin Station */}
-            <div ref={originRef} style={{ flex: 1, position: 'relative' }}>
+            <div ref={originRef} className='station-input-wrapper'>
                 <input
-                    type="text"
-                    className="search-input"
-                    placeholder="From..."
+                    type='text'
+                    className='search-input station-input'
+                    placeholder='From...'
                     value={originSearch || originStation?.name || ''}
                     onChange={(e) => {
                         setOriginSearch(e.target.value);
@@ -145,34 +142,9 @@ export function StationSelector({
                         setOriginSearch('');
                         setOriginDropdownOpen(true);
                     }}
-                    style={{
-                        width: '100%',
-                        height: '4rem',
-                        textAlign: 'center',
-                        padding: '0.6rem',
-                        fontSize: '16px',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '6px',
-                        color: 'var(--color-text)',
-                    }}
                 />
                 {originDropdownOpen && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: 'calc(100% + 0.25rem)',
-                            left: 0,
-                            right: 0,
-                            maxHeight: '300px',
-                            overflowY: 'auto',
-                            textAlign: 'center',
-                            background: 'var(--color-card-bg)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '6px',
-                            zIndex: 1000,
-                        }}
-                    >
+                    <div className='station-dropdown'>
                         {filteredOrigin.map((s) => (
                             <div
                                 key={s.id}
@@ -185,30 +157,9 @@ export function StationSelector({
                                     setOriginSearch('');
                                     setOriginDropdownOpen(false);
                                 }}
-                                style={{
-                                    padding: '0.6rem',
-                                    cursor: 'pointer',
-                                    background:
-                                        s.id === originId
-                                            ? 'rgba(56, 189, 248, 0.1)'
-                                            : 'transparent',
-                                    borderBottom:
-                                        '1px solid rgba(255, 255, 255, 0.05)',
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (s.id !== originId) {
-                                        e.currentTarget.style.background =
-                                            'rgba(255, 255, 255, 0.05)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (s.id !== originId) {
-                                        e.currentTarget.style.background =
-                                            'transparent';
-                                    }
-                                }}
+                                className={`station-dropdown-item ${s.id === originId ? 'selected' : ''}`}
                             >
-                                <div style={{ fontSize: '0.9rem' }}>
+                                <div className='station-dropdown-item-text'>
                                     {s.name}
                                 </div>
                             </div>
@@ -218,16 +169,16 @@ export function StationSelector({
             </div>
 
             {/* Arrow */}
-            <div style={{ color: 'var(--color-text-dim)', flexShrink: 0 }}>
+            <div className='station-arrow'>
                 <ArrowRight size={20} />
             </div>
 
             {/* Destination Station */}
-            <div ref={destRef} style={{ flex: 1, position: 'relative' }}>
+            <div ref={destRef} className='station-input-wrapper'>
                 <input
-                    type="text"
-                    className="search-input"
-                    placeholder="To..."
+                    type='text'
+                    className='search-input station-input'
+                    placeholder='To...'
                     value={destSearch || destStation?.name || ''}
                     onChange={(e) => {
                         setDestSearch(e.target.value);
@@ -237,34 +188,9 @@ export function StationSelector({
                         setDestSearch('');
                         setDestDropdownOpen(true);
                     }}
-                    style={{
-                        width: '100%',
-                        height: '4rem',
-                        textAlign: 'center',
-                        padding: '0.6rem',
-                        fontSize: '16px',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '6px',
-                        color: 'var(--color-text)',
-                    }}
                 />
                 {destDropdownOpen && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: 'calc(100% + 0.25rem)',
-                            left: 0,
-                            right: 0,
-                            maxHeight: '300px',
-                            overflowY: 'auto',
-                            background: 'var(--color-card-bg)',
-                            textAlign: 'center',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '6px',
-                            zIndex: 1000,
-                        }}
-                    >
+                    <div className='station-dropdown'>
                         {filteredDest.map((s) => (
                             <div
                                 key={s.id}
@@ -273,30 +199,9 @@ export function StationSelector({
                                     setDestSearch('');
                                     setDestDropdownOpen(false);
                                 }}
-                                style={{
-                                    padding: '0.6rem',
-                                    cursor: 'pointer',
-                                    background:
-                                        s.id === destId
-                                            ? 'rgba(56, 189, 248, 0.1)'
-                                            : 'transparent',
-                                    borderBottom:
-                                        '1px solid rgba(255, 255, 255, 0.05)',
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (s.id !== destId) {
-                                        e.currentTarget.style.background =
-                                            'rgba(255, 255, 255, 0.05)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (s.id !== destId) {
-                                        e.currentTarget.style.background =
-                                            'transparent';
-                                    }
-                                }}
+                                className={`station-dropdown-item ${s.id === destId ? 'selected' : ''}`}
                             >
-                                <div style={{ fontSize: '0.9rem' }}>
+                                <div className='station-dropdown-item-text'>
                                     {s.name}
                                 </div>
                             </div>

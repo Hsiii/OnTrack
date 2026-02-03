@@ -1,10 +1,15 @@
-.app-header {
-    text-align: center;
-    margin-bottom: 2rem;
+.app-container {
+    width: 100%;
 }
 
-main {
+.app-main {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
+}
+
+.app-placeholder {
+    text-align: center;
+    opacity: 0.5;
+    margin-top: 2rem;
 }

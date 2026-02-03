@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Share2, Copy } from 'lucide-react';
 import type { TrainInfo } from '../types';
+import './ShareCard.css';
 
 interface ShareCardProps {
     train: TrainInfo | null;
@@ -69,64 +70,18 @@ export function ShareCard({ train, destName }: ShareCardProps) {
     if (!train) return null;
 
     return (
-        <div
-            className="message-bar-fixed"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
-        >
+        <div className="message-bar-fixed share-card-container">
             <input
                 type="text"
-                style={{
-                    flex: 1,
-                    background: 'rgba(0,0,0,0.2)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'var(--color-text)',
-                    padding: '0.75rem 1rem',
-                    fontFamily: 'inherit',
-                    fontSize: '1rem',
-                    borderRadius: '20px',
-                    textAlign: 'center',
-                    outline: 'none',
-                }}
+                className="share-card-input"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
             />
 
-            <button
-                onClick={handleShare}
-                style={{
-                    width: '44px',
-                    height: '44px',
-                    color: 'var(--color-text)',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 0,
-                    flexShrink: 0,
-                }}
-            >
+            <button onClick={handleShare} className="share-card-button">
                 <Share2 size={20} />
             </button>
-            <button
-                onClick={handleCopy}
-                style={{
-                    width: '44px',
-                    height: '44px',
-                    color: 'var(--color-text)',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 0,
-                    flexShrink: 0,
-                }}
-            >
+            <button onClick={handleCopy} className="share-card-button">
                 <Copy size={20} />
             </button>
         </div>

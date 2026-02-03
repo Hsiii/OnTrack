@@ -1,6 +1,15 @@
-import { useEffect, useState, useCallback, startTransition, useRef } from 'react';
+import {
+    startTransition,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
+
 import { api } from '../api/client';
 import type { TrainInfo } from '../types';
+
+import './TrainList.css';
 
 interface TrainListProps {
     originId: string;
@@ -9,12 +18,19 @@ interface TrainListProps {
     selectedTrainNo: string | null;
 }
 
-export function TrainList({ originId, destId, onSelect, selectedTrainNo }: TrainListProps) {
+export function TrainList({
+    originId,
+    destId,
+    onSelect,
+    selectedTrainNo,
+}: TrainListProps) {
     const [trains, setTrains] = useState<TrainInfo[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [lastFetchTime, setLastFetchTime] = useState<number | null>(null);
-    const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+        undefined
+    );
     const lastFetchParamsRef = useRef<string>('');
     const isFirstMountRef = useRef(true);
 
@@ -61,8 +77,9 @@ export function TrainList({ originId, destId, onSelect, selectedTrainNo }: Train
                     const end = start + 3;
                     displayTrains = res.trains.slice(start, end);
                     recommendedTrain =
-                        displayTrains.find((t) => t.departureTime >= currentTimeStr) ||
-                        displayTrains[0];
+                        displayTrains.find(
+                            (t) => t.departureTime >= currentTimeStr
+                        ) || displayTrains[0];
                 }
 
                 setTrains(displayTrains);
@@ -115,33 +132,39 @@ export function TrainList({ originId, destId, onSelect, selectedTrainNo }: Train
     if (!originId || !destId) return null;
     const date = new Date();
     // Show loading only if no recent data (older than 2 minutes or no data)
-    const hasRecentData = lastFetchTime && date !== null && date.getTime() - lastFetchTime < 120000;
+    const hasRecentData =
+        lastFetchTime &&
+        date !== null &&
+        date.getTime() - lastFetchTime < 120000;
     const shouldShowLoading = loading && !hasRecentData;
 
     if (shouldShowLoading)
         return (
-            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-                <div className="spinner" style={{ marginBottom: '1rem' }}></div>
+            <div className='glass-panel train-list-loading'>
+                <div className='spinner train-list-loading-spinner'></div>
                 Loading schedule...
             </div>
         );
 
     if (error)
         return (
-            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <div style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{error}</div>
-                <button onClick={fetchSchedule} className="btn-primary" style={{ width: 'auto' }}>
+            <div className='glass-panel train-list-error'>
+                <div className='train-list-error-message'>{error}</div>
+                <button
+                    onClick={fetchSchedule}
+                    className='btn-primary train-list-error-button'
+                >
                     Retry
                 </button>
             </div>
         );
 
     if (trains.length === 0)
-        return <div style={{ textAlign: 'center', opacity: 0.7 }}>No trains found.</div>;
+        return <div className='train-list-empty'>No trains found.</div>;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <span className="label-dim">Upcoming Trains</span>
+        <div className='train-list-container'>
+            <span className='label-dim'>Upcoming Trains</span>
 
             {trains.map((train) => {
                 const isSelected = train.trainNo === selectedTrainNo;
@@ -163,47 +186,32 @@ export function TrainList({ originId, destId, onSelect, selectedTrainNo }: Train
                 return (
                     <div
                         key={train.trainNo}
-                        className="glass-panel clickable-item"
+                        className={`glass-panel clickable-item train-card ${isSelected ? 'selected' : ''}`}
                         onClick={() => onSelect(train)}
-                        style={{
-                            padding: '1rem',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            border: isSelected
-                                ? '2px solid var(--color-primary)'
-                                : '1px solid transparent',
-                            background: isSelected
-                                ? 'rgba(56, 189, 248, 0.1)'
-                                : 'var(--color-card-bg)',
-                        }}
                     >
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                        <div className='train-card-left'>
+                            <div className='train-card-time-row'>
+                                <span className='train-card-departure-time'>
                                     {train.departureTime}
                                 </span>
                                 {isNext && (
-                                    <span
-                                        className="badge badge-success"
-                                        style={{
-                                            background: 'var(--color-primary)',
-                                            color: '#000',
-                                        }}
-                                    >
+                                    <span className='badge badge-success train-card-next-badge'>
                                         Next
                                     </span>
                                 )}
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-dim)' }}>
-                                ➔ {train.arrivalTime} • {train.trainType} {train.trainNo}
+                            <div className='train-card-details'>
+                                ➔ {train.arrivalTime} • {train.trainType}{' '}
+                                {train.trainNo}
                             </div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
+                        <div className='train-card-right'>
                             <div
                                 className={`badge ${train.status === 'delayed' ? 'badge-danger' : 'badge-success'}`}
                             >
-                                {train.delay && train.delay > 0 ? `+${train.delay} min` : 'On Time'}
+                                {train.delay && train.delay > 0
+                                    ? `+${train.delay} min`
+                                    : 'On Time'}
                             </div>
                         </div>
                     </div>
