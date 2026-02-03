@@ -8,8 +8,7 @@ import type { TrainInfo, Station } from './types';
 import { api } from './api/client';
 
 function App() {
-    const { originId, setOriginId, destId, setDestId, template, setTemplate, resetTemplate } =
-        usePersistence();
+    const { originId, setOriginId, destId, setDestId } = usePersistence();
 
     const [stations, setStations] = useState<Station[]>([]);
     const [selectedTrain, setSelectedTrain] = useState<TrainInfo | null>(null);
@@ -46,14 +45,7 @@ function App() {
                 )}
 
                 {selectedTrain && (
-                    <ShareCard
-                        train={selectedTrain}
-                        originName={originName}
-                        destName={destName}
-                        template={template}
-                        setTemplate={setTemplate}
-                        resetTemplate={resetTemplate}
-                    />
+                    <ShareCard train={selectedTrain} originName={originName} destName={destName} />
                 )}
 
                 {(!originId || !destId) && (

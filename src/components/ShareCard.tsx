@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { Share2, Copy } from 'lucide-react';
 import type { TrainInfo } from '../types';
 
@@ -5,21 +6,11 @@ interface ShareCardProps {
     train: TrainInfo | null;
     originName: string;
     destName: string;
-    template: string;
-    setTemplate: (t: string) => void;
-    resetTemplate: () => void;
 }
 
-export function ShareCard({
-    train,
-    originName,
-    destName,
-    template,
-    setTemplate,
-    resetTemplate,
-}: ShareCardProps) {
+export function ShareCard({ train, destName }: ShareCardProps) {
     // Calculate adjusted arrival time (with delay)
-    const getAdjustedTime = () => {
+    const adjustedTime = useMemo(() => {
         if (!train) return '';
         if (!train.delay || train.delay === 0) return train.arrivalTime;
 
@@ -28,26 +19,21 @@ export function ShareCard({
         const adjustedHours = Math.floor(totalMinutes / 60) % 24;
         const adjustedMinutes = totalMinutes % 60;
         return `${String(adjustedHours).padStart(2, '0')}:${String(adjustedMinutes).padStart(2, '0')}`;
-    };
+    }, [train]);
 
-    // Calculate message directly during render (derived state)
-    const message = !train
-        ? 'Please select a train first.'
-        : template
-              .replace('{train_type}', train.trainType)
-              .replace('{train_no}', train.trainNo)
-              .replace(
-                  '{direction}',
-                  train.direction === 0 ? 'Clockwise (Shun)' : 'Counter-clockwise (Ni)'
-              )
-              .replace('{origin}', originName)
-              .replace('{dest}', destName)
-              .replace('{time}', train.arrivalTime)
-              .replace('{adjusted_time}', getAdjustedTime())
-              .replace(
-                  '{status}',
-                  train.status === 'delayed' ? `Delayed ${train.delay}m` : 'On Time'
-              );
+    // Simple message: "<time>到<station>"
+    const defaultMessage = train ? `${adjustedTime}到${destName}` : '';
+    
+    // Use train number as key to reset message when train changes
+    const trainKey = train?.trainNo || '';
+    const [message, setMessage] = useState(defaultMessage);
+    const [lastTrainKey, setLastTrainKey] = useState(trainKey);
+
+    // Reset message when train changes
+    if (trainKey !== lastTrainKey) {
+        setMessage(defaultMessage);
+        setLastTrainKey(trainKey);
+    }
 
     const handleShare = async () => {
         if (!train) return;
@@ -83,88 +69,63 @@ export function ShareCard({
     if (!train) return null;
 
     return (
-        <div className="glass-panel" style={{ padding: '1.5rem', marginTop: '1rem' }}>
-            <label className="label-dim">Message Preview</label>
-
-            <textarea
-                className="glass-panel"
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <input
+                type="text"
                 style={{
-                    width: '100%',
-                    minHeight: '80px',
+                    flex: 1,
                     background: 'rgba(0,0,0,0.2)',
-                    border: 'none',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     color: 'var(--color-text)',
-                    padding: '0.5rem',
-                    marginBottom: '0.5rem',
+                    padding: '0.75rem 1rem',
                     fontFamily: 'inherit',
-                    resize: 'vertical',
+                    fontSize: '1rem',
+                    borderRadius: '20px',
+                    textAlign: 'center',
+                    outline: 'none',
                 }}
-                value={template}
-                onChange={(e) => setTemplate(e.target.value)}
-                placeholder="Customize your message template..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
             />
 
-            <div
-                style={{ fontSize: '0.8rem', color: 'var(--color-text-dim)', marginBottom: '1rem' }}
+            <button
+                onClick={handleShare}
+                style={{
+                    width: '44px',
+                    height: '44px',
+                    color: 'var(--color-text)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    flexShrink: 0,
+                }}
             >
-                Result: <span style={{ color: '#fff' }}>{message}</span>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                        onClick={handleShare}
-                        style={{
-                            flex: 1,
-                            padding: '0.6rem',
-                            fontSize: '0.875rem',
-                            color: 'var(--color-text)',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                        }}
-                    >
-                        <Share2 size={16} />
-                        分享
-                    </button>
-                    <button
-                        onClick={handleCopy}
-                        style={{
-                            flex: 1,
-                            padding: '0.6rem',
-                            fontSize: '0.875rem',
-                            color: 'var(--color-text)',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                        }}
-                    >
-                        <Copy size={16} />
-                        複製
-                    </button>
-                </div>
-                <button
-                    onClick={resetTemplate}
-                    style={{
-                        padding: '0.5rem',
-                        color: 'var(--color-text-dim)',
-                        fontSize: '0.8rem',
-                    }}
-                    title="Reset to Default"
-                >
-                    重設範本
-                </button>
-            </div>
+                <Share2 size={20} />
+            </button>
+            <button
+                onClick={handleCopy}
+                style={{
+                    width: '44px',
+                    height: '44px',
+                    color: 'var(--color-text)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    flexShrink: 0,
+                }}
+            >
+                <Copy size={20} />
+            </button>
         </div>
     );
 }
