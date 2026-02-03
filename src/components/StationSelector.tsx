@@ -91,6 +91,20 @@ export function StationSelector({
         localStorage.setItem(CACHED_ORIGIN_KEY, id);
     };
 
+    const handleOriginDropdownOpen = (isOpen: boolean) => {
+        setOriginDropdownOpen(isOpen);
+        if (isOpen) {
+            setDestDropdownOpen(false);
+        }
+    };
+
+    const handleDestDropdownOpen = (isOpen: boolean) => {
+        setDestDropdownOpen(isOpen);
+        if (isOpen) {
+            setOriginDropdownOpen(false);
+        }
+    };
+
     return (
         <div className='station-selector-container'>
             {/* Origin Station */}
@@ -99,7 +113,7 @@ export function StationSelector({
                 searchValue={originSearch}
                 setSearchValue={setOriginSearch}
                 isOpen={originDropdownOpen}
-                setIsOpen={setOriginDropdownOpen}
+                setIsOpen={handleOriginDropdownOpen}
                 selectedId={originId}
                 onSelect={handleOriginSelect}
                 placeholder='From...'
@@ -120,7 +134,7 @@ export function StationSelector({
                 searchValue={destSearch}
                 setSearchValue={setDestSearch}
                 isOpen={destDropdownOpen}
-                setIsOpen={setDestDropdownOpen}
+                setIsOpen={handleDestDropdownOpen}
                 selectedId={destId}
                 onSelect={setDestId}
                 placeholder='To...'

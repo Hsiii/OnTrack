@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { Station } from '../types';
 
@@ -28,12 +28,14 @@ export function StationDropdown({
     onCacheSelection,
 }: StationDropdownProps) {
     const ref = useRef<HTMLDivElement>(null);
+    const [isFocused, setIsFocused] = useState(false);
 
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (ref.current && !ref.current.contains(event.target as Node)) {
                 setIsOpen(false);
+                setIsFocused(false);
             }
         };
 
@@ -57,7 +59,13 @@ export function StationDropdown({
         }
         setSearchValue('');
         setIsOpen(false);
+        setIsFocused(false);
     };
+
+    // Determine the display value for the input
+    const displayValue = isFocused || isOpen
+        ? searchValue
+        : selectedStation?.name || '';
 
     return (
         <div ref={ref} className='station-input-wrapper'>
@@ -65,14 +73,18 @@ export function StationDropdown({
                 type='text'
                 className='search-input station-input'
                 placeholder={placeholder}
-                value={searchValue || selectedStation?.name || ''}
+                value={displayValue}
                 onChange={(e) => {
                     setSearchValue(e.target.value);
                     setIsOpen(true);
                 }}
                 onFocus={() => {
+                    setIsFocused(true);
                     setSearchValue('');
                     setIsOpen(true);
+                }}
+                onBlur={() => {
+                    setIsFocused(false);
                 }}
             />
             {isOpen && (

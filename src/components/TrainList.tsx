@@ -162,7 +162,7 @@ export function TrainList({
 
     return (
         <div className='train-list-container'>
-            <span className='label-dim'>Upcoming Trains</span>
+            <span className='label-dim'>選擇列車</span>
 
             {trains.map((train) => {
                 const isSelected = train.trainNo === selectedTrainNo;
