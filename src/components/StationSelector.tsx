@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowRight } from 'lucide-react';
 import type { Station } from '../types';
 
 interface StationSelectorProps {
@@ -10,6 +10,8 @@ interface StationSelectorProps {
     setDestId: (id: string) => void;
 }
 
+const CACHED_ORIGIN_KEY = 'mom_app_cached_origin';
+
 export function StationSelector({
     stations,
     originId,
@@ -19,28 +21,35 @@ export function StationSelector({
 }: StationSelectorProps) {
     const [originSearch, setOriginSearch] = useState('');
     const [destSearch, setDestSearch] = useState('');
-    const [findingNearest, setFindingNearest] = useState(false);
+    const [originDropdownOpen, setOriginDropdownOpen] = useState(false);
+    const [destDropdownOpen, setDestDropdownOpen] = useState(false);
+    const originRef = useRef<HTMLDivElement>(null);
+    const destRef = useRef<HTMLDivElement>(null);
+    const hasAutoSelected = useRef(false);
 
-    const handleSwap = () => {
-        const temp = originId;
-        setOriginId(destId);
-        setDestId(temp);
-    };
+    // Auto-select nearest station on load
+    useEffect(() => {
+        if (stations.length === 0 || originId || hasAutoSelected.current) return;
 
-    const findNearestStation = () => {
-        setFindingNearest(true);
+        hasAutoSelected.current = true;
 
+        // Try to use cached origin first
+        const cachedOriginId = localStorage.getItem(CACHED_ORIGIN_KEY);
+        if (cachedOriginId && stations.find((s) => s.id === cachedOriginId)) {
+            setOriginId(cachedOriginId);
+            return;
+        }
+
+        // Try geolocation
         if (!navigator.geolocation) {
-            alert('您的瀏覽器不支援定位功能');
-            setFindingNearest(false);
+            // Fallback: select first station
+            if (stations[0]) setOriginId(stations[0].id);
             return;
         }
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-
-                // Find nearest station
                 let nearestStation = stations[0];
                 let minDistance = Number.MAX_VALUE;
 
@@ -57,146 +66,224 @@ export function StationSelector({
                     }
                 });
 
-                setOriginId(nearestStation.id);
-                setFindingNearest(false);
-                alert(`已選擇最近車站：${nearestStation.name}`);
+                if (nearestStation) {
+                    setOriginId(nearestStation.id);
+                    localStorage.setItem(CACHED_ORIGIN_KEY, nearestStation.id);
+                }
             },
-            (error) => {
-                console.error('定位錯誤:', error);
-                alert('無法取得您的位置，請確認已允許瀏覽器使用定位功能');
-                setFindingNearest(false);
+            () => {
+                // Fallback on error: select first station
+                if (stations[0]) {
+                    setOriginId(stations[0].id);
+                }
             }
         );
-    };
+    }, [stations, originId, setOriginId]);
 
-    const filteredOrigin = stations.filter(
-        (s) =>
-            s.name.includes(originSearch) ||
-            s.nameEn.toLowerCase().includes(originSearch.toLowerCase())
-    );
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (originRef.current && !originRef.current.contains(event.target as Node)) {
+                setOriginDropdownOpen(false);
+            }
+            if (destRef.current && !destRef.current.contains(event.target as Node)) {
+                setDestDropdownOpen(false);
+            }
+        };
 
-    const filteredDest = stations.filter(
-        (s) =>
-            s.name.includes(destSearch) || s.nameEn.toLowerCase().includes(destSearch.toLowerCase())
-    );
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const filteredOrigin = originSearch
+        ? stations.filter(
+              (s) =>
+                  s.name.includes(originSearch) ||
+                  s.nameEn.toLowerCase().includes(originSearch.toLowerCase())
+          )
+        : stations;
+
+    const filteredDest = destSearch
+        ? stations.filter(
+              (s) =>
+                  s.name.includes(destSearch) ||
+                  s.nameEn.toLowerCase().includes(destSearch.toLowerCase())
+          )
+        : stations;
+
+    const originStation = stations.find((s) => s.id === originId);
+    const destStation = stations.find((s) => s.id === destId);
 
     return (
         <div
             className="glass-panel"
-            style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+            style={{
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+            }}
         >
-            <div className="input-group">
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '0.5rem',
+            {/* Origin Station */}
+            <div ref={originRef} style={{ flex: 1, position: 'relative' }}>
+                <input
+                    type="text"
+                    className="search-input"
+                    placeholder="From..."
+                    value={originSearch || originStation?.name || ''}
+                    onChange={(e) => {
+                        setOriginSearch(e.target.value);
+                        setOriginDropdownOpen(true);
                     }}
-                >
-                    <label className="label-dim" style={{ marginBottom: 0 }}>
-                        From (Origin)
-                    </label>
-                    <button
-                        onClick={findNearestStation}
-                        disabled={findingNearest}
+                    onFocus={() => {
+                        setOriginSearch('');
+                        setOriginDropdownOpen(true);
+                    }}
+                    style={{
+                        width: '100%',
+                        padding: '0.6rem',
+                        fontSize: '0.9rem',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '6px',
+                        color: 'var(--color-text)',
+                    }}
+                />
+                {originDropdownOpen && (
+                    <div
                         style={{
-                            padding: '0.3rem 0.8rem',
-                            fontSize: '0.8rem',
-                            color: 'var(--color-primary)',
-                            background: 'rgba(56, 189, 248, 0.1)',
-                            border: '1px solid var(--color-primary)',
-                            borderRadius: '4px',
-                            cursor: findingNearest ? 'wait' : 'pointer',
-                            opacity: findingNearest ? 0.6 : 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
+                            position: 'absolute',
+                            top: 'calc(100% + 0.25rem)',
+                            left: 0,
+                            right: 0,
+                            maxHeight: '300px',
+                            overflowY: 'auto',
+                            background: 'var(--color-card-bg)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '6px',
+                            zIndex: 1000,
                         }}
                     >
-                        {findingNearest ? (
-                            '定位中...'
-                        ) : (
-                            <>
-                                <MapPin size={14} />
-                                選擇最近
-                            </>
-                        )}
-                    </button>
-                </div>
-                <div style={{ position: 'relative' }}>
-                    <input
-                        type="text"
-                        className="search-input"
-                        placeholder="Search station..."
-                        value={originSearch}
-                        onChange={(e) => setOriginSearch(e.target.value)}
-                    />
-                    <select
-                        value={originId}
-                        onChange={(e) => {
-                            setOriginId(e.target.value);
-                            setOriginSearch('');
-                        }}
-                        style={{ marginTop: '0.5rem' }}
-                    >
-                        <option value="">Select Station</option>
-                        {(originSearch ? filteredOrigin : stations).map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.name} ({s.nameEn})
-                            </option>
+                        {filteredOrigin.map((s) => (
+                            <div
+                                key={s.id}
+                                onClick={() => {
+                                    setOriginId(s.id);
+                                    localStorage.setItem(CACHED_ORIGIN_KEY, s.id);
+                                    setOriginSearch('');
+                                    setOriginDropdownOpen(false);
+                                }}
+                                style={{
+                                    padding: '0.6rem',
+                                    cursor: 'pointer',
+                                    background:
+                                        s.id === originId
+                                            ? 'rgba(56, 189, 248, 0.1)'
+                                            : 'transparent',
+                                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (s.id !== originId) {
+                                        e.currentTarget.style.background =
+                                            'rgba(255, 255, 255, 0.05)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (s.id !== originId) {
+                                        e.currentTarget.style.background = 'transparent';
+                                    }
+                                }}
+                            >
+                                <div style={{ fontSize: '0.9rem' }}>{s.name}</div>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>
+                                    {s.nameEn}
+                                </div>
+                            </div>
                         ))}
-                    </select>
-                </div>
+                    </div>
+                )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '-0.75rem 0' }}>
-                <button
-                    onClick={handleSwap}
-                    style={{
-                        padding: '10px',
-                        color: 'var(--color-primary)',
-                        fontSize: '1.4rem',
-                        background: 'rgba(255,255,255,0.05)',
-                        borderRadius: '50%',
-                        width: '40px',
-                        height: '40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+            {/* Arrow */}
+            <div style={{ color: 'var(--color-text-dim)', flexShrink: 0 }}>
+                <ArrowRight size={20} />
+            </div>
+
+            {/* Destination Station */}
+            <div ref={destRef} style={{ flex: 1, position: 'relative' }}>
+                <input
+                    type="text"
+                    className="search-input"
+                    placeholder="To..."
+                    value={destSearch || destStation?.name || ''}
+                    onChange={(e) => {
+                        setDestSearch(e.target.value);
+                        setDestDropdownOpen(true);
                     }}
-                    title="Swap Stations"
-                >
-                    ⇅
-                </button>
-            </div>
-
-            <div className="input-group">
-                <label className="label-dim">To (Destination)</label>
-                <div style={{ position: 'relative' }}>
-                    <input
-                        type="text"
-                        className="search-input"
-                        placeholder="Search station..."
-                        value={destSearch}
-                        onChange={(e) => setDestSearch(e.target.value)}
-                    />
-                    <select
-                        value={destId}
-                        onChange={(e) => {
-                            setDestId(e.target.value);
-                            setDestSearch('');
+                    onFocus={() => {
+                        setDestSearch('');
+                        setDestDropdownOpen(true);
+                    }}
+                    style={{
+                        width: '100%',
+                        padding: '0.6rem',
+                        fontSize: '0.9rem',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '6px',
+                        color: 'var(--color-text)',
+                    }}
+                />
+                {destDropdownOpen && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 0.25rem)',
+                            left: 0,
+                            right: 0,
+                            maxHeight: '300px',
+                            overflowY: 'auto',
+                            background: 'var(--color-card-bg)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '6px',
+                            zIndex: 1000,
                         }}
-                        style={{ marginTop: '0.5rem' }}
                     >
-                        <option value="">Select Station</option>
-                        {(destSearch ? filteredDest : stations).map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.name} ({s.nameEn})
-                            </option>
+                        {filteredDest.map((s) => (
+                            <div
+                                key={s.id}
+                                onClick={() => {
+                                    setDestId(s.id);
+                                    setDestSearch('');
+                                    setDestDropdownOpen(false);
+                                }}
+                                style={{
+                                    padding: '0.6rem',
+                                    cursor: 'pointer',
+                                    background:
+                                        s.id === destId ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+                                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (s.id !== destId) {
+                                        e.currentTarget.style.background =
+                                            'rgba(255, 255, 255, 0.05)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (s.id !== destId) {
+                                        e.currentTarget.style.background = 'transparent';
+                                    }
+                                }}
+                            >
+                                <div style={{ fontSize: '0.9rem' }}>{s.name}</div>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>
+                                    {s.nameEn}
+                                </div>
+                            </div>
                         ))}
-                    </select>
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );
