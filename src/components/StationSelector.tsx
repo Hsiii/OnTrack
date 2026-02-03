@@ -29,7 +29,8 @@ export function StationSelector({
 
     // Auto-select nearest station on load
     useEffect(() => {
-        if (stations.length === 0 || originId || hasAutoSelected.current) return;
+        if (stations.length === 0 || originId || hasAutoSelected.current)
+            return;
 
         hasAutoSelected.current = true;
 
@@ -83,16 +84,23 @@ export function StationSelector({
     // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (originRef.current && !originRef.current.contains(event.target as Node)) {
+            if (
+                originRef.current &&
+                !originRef.current.contains(event.target as Node)
+            ) {
                 setOriginDropdownOpen(false);
             }
-            if (destRef.current && !destRef.current.contains(event.target as Node)) {
+            if (
+                destRef.current &&
+                !destRef.current.contains(event.target as Node)
+            ) {
                 setDestDropdownOpen(false);
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        return () =>
+            document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const filteredOrigin = originSearch
@@ -170,7 +178,10 @@ export function StationSelector({
                                 key={s.id}
                                 onClick={() => {
                                     setOriginId(s.id);
-                                    localStorage.setItem(CACHED_ORIGIN_KEY, s.id);
+                                    localStorage.setItem(
+                                        CACHED_ORIGIN_KEY,
+                                        s.id
+                                    );
                                     setOriginSearch('');
                                     setOriginDropdownOpen(false);
                                 }}
@@ -181,7 +192,8 @@ export function StationSelector({
                                         s.id === originId
                                             ? 'rgba(56, 189, 248, 0.1)'
                                             : 'transparent',
-                                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                    borderBottom:
+                                        '1px solid rgba(255, 255, 255, 0.05)',
                                 }}
                                 onMouseEnter={(e) => {
                                     if (s.id !== originId) {
@@ -191,11 +203,14 @@ export function StationSelector({
                                 }}
                                 onMouseLeave={(e) => {
                                     if (s.id !== originId) {
-                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.background =
+                                            'transparent';
                                     }
                                 }}
                             >
-                                <div style={{ fontSize: '0.9rem' }}>{s.name}</div>
+                                <div style={{ fontSize: '0.9rem' }}>
+                                    {s.name}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -262,8 +277,11 @@ export function StationSelector({
                                     padding: '0.6rem',
                                     cursor: 'pointer',
                                     background:
-                                        s.id === destId ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
-                                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                        s.id === destId
+                                            ? 'rgba(56, 189, 248, 0.1)'
+                                            : 'transparent',
+                                    borderBottom:
+                                        '1px solid rgba(255, 255, 255, 0.05)',
                                 }}
                                 onMouseEnter={(e) => {
                                     if (s.id !== destId) {
@@ -273,11 +291,14 @@ export function StationSelector({
                                 }}
                                 onMouseLeave={(e) => {
                                     if (s.id !== destId) {
-                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.background =
+                                            'transparent';
                                     }
                                 }}
                             >
-                                <div style={{ fontSize: '0.9rem' }}>{s.name}</div>
+                                <div style={{ fontSize: '0.9rem' }}>
+                                    {s.name}
+                                </div>
                             </div>
                         ))}
                     </div>

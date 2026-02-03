@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
@@ -8,7 +8,11 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+            includeAssets: [
+                'favicon.ico',
+                'apple-touch-icon.png',
+                'mask-icon.svg',
+            ],
             manifest: {
                 name: 'MomComePickMeUp',
                 short_name: 'MomPickMe',
@@ -29,6 +33,13 @@ export default defineConfig({
             },
         }),
     ],
+    resolve: {
+        alias: {
+            components: '/src/components',
+            hooks: '/src/hooks',
+            api: '/src/api',
+        },
+    },
     server: {
         proxy: {
             '/api': {
