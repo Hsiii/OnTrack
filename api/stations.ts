@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { fetchTDX } from './_utils/tdx.js';
 
 // Simple in-memory cache for stations data
-let stationsCache: { data: any; expires: number } | null = null;
+let stationsCache: { data: TDXStation[]; expires: number } | null = null;
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour (stations rarely change)
 
 interface TDXStation {

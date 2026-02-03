@@ -3,13 +3,8 @@ import { fetchTDX } from './_utils/tdx.js';
 import type { TrainInfo as AppTrainInfo } from '../src/types.js';
 
 // Simple in-memory cache for timetable data
-const timetableCache = new Map<string, { data: any; expires: number }>();
+const timetableCache = new Map<string, { data: TDXFullTimetable[]; expires: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-interface TDXLiveDelay {
-    TrainNo: string;
-    DelayTime: number;
-}
 
 interface TDXStopTime {
     StationID: string;
