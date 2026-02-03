@@ -46,13 +46,11 @@ function App() {
                     />
                 )}
 
-                {selectedTrain && (
-                    <ShareCard
-                        train={selectedTrain}
-                        originName={originName}
-                        destName={destName}
-                    />
-                )}
+                <ShareCard
+                    train={selectedTrain}
+                    originName={originName}
+                    destName={destName}
+                />
 
                 {(!originId || !destId) && (
                     <div className='app-placeholder'>

@@ -170,7 +170,7 @@ export function TrainList({
         );
 
     if (trains.length === 0)
-        return <div className='train-list-empty'>No trains found.</div>;
+        return <div className='train-list-empty'>完了 回不了家了</div>;
 
     return (
         <div className='train-list-container'>

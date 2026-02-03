@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react';
-import { Share2, Copy } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Copy, Share2 } from 'lucide-react';
+
 import type { TrainInfo } from '../types';
 import { IconButton } from './IconButton';
+
 import './ShareCard.css';
 
 interface ShareCardProps {
@@ -23,23 +25,19 @@ export function ShareCard({ train, destName }: ShareCardProps) {
         return `${String(adjustedHours).padStart(2, '0')}:${String(adjustedMinutes).padStart(2, '0')}`;
     }, [train]);
 
-    // Simple message: "<time>到<station>"
-    const defaultMessage = train ? `${adjustedTime}到${destName}` : '';
+    // Simple message: "<time>到<station>" or no train message
+    const defaultMessage = train
+        ? `${adjustedTime}到${destName}`
+        : '好像沒車搭了';
 
-    // Use train number as key to reset message when train changes
-    const trainKey = train?.trainNo || '';
     const [message, setMessage] = useState(defaultMessage);
-    const [lastTrainKey, setLastTrainKey] = useState(trainKey);
 
-    // Reset message when train changes
-    if (trainKey !== lastTrainKey) {
+    // Reset message when defaultMessage changes (train selection or delay update)
+    useEffect(() => {
         setMessage(defaultMessage);
-        setLastTrainKey(trainKey);
-    }
+    }, [defaultMessage]);
 
     const handleShare = async () => {
-        if (!train) return;
-
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -57,8 +55,6 @@ export function ShareCard({ train, destName }: ShareCardProps) {
     };
 
     const handleCopy = async () => {
-        if (!train) return;
-
         try {
             await navigator.clipboard.writeText(message);
             alert('訊息已複製到剪貼簿！');
@@ -68,21 +64,19 @@ export function ShareCard({ train, destName }: ShareCardProps) {
         }
     };
 
-    if (!train) return null;
-
     return (
-        <div className="message-bar-fixed share-card-container">
+        <div className='message-bar-fixed share-card-container'>
             <input
-                type="text"
-                className="share-card-input"
+                type='text'
+                className='share-card-input'
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
             />
 
-            <IconButton onClick={handleShare} className="share-card-button">
+            <IconButton onClick={handleShare} className='share-card-button'>
                 <Share2 size={20} />
             </IconButton>
-            <IconButton onClick={handleCopy} className="share-card-button">
+            <IconButton onClick={handleCopy} className='share-card-button'>
                 <Copy size={20} />
             </IconButton>
         </div>
