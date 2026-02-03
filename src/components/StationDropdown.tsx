@@ -63,9 +63,8 @@ export function StationDropdown({
     };
 
     // Determine the display value for the input
-    const displayValue = isFocused || isOpen
-        ? searchValue
-        : selectedStation?.name || '';
+    const displayValue =
+        isFocused || isOpen ? searchValue : selectedStation?.name || '';
 
     return (
         <div ref={ref} className='station-input-wrapper'>
