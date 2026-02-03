@@ -2,6 +2,10 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { fetchTDX } from './_utils/tdx.js';
 import type { TrainInfo as AppTrainInfo } from '../src/types.js';
 
+// Simple in-memory cache for timetable data
+const timetableCache = new Map<string, { data: any; expires: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 interface TDXLiveDelay {
     TrainNo: string;
     DelayTime: number;
@@ -37,23 +41,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         queryDate === new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
 
     try {
-        // 1. Fetch full day schedule (OD endpoint is not available)
-        // Use Today endpoint when querying current day for better performance
+        // 1. Fetch full day schedule with caching
         const scheduleUrl = isToday
             ? `v3/Rail/TRA/DailyTrainTimetable/Today`
             : `v3/Rail/TRA/DailyTrainTimetable/TrainDate/${queryDate}`;
-        const allTrains = await fetchTDX(scheduleUrl, { tier: 'basic' });
 
-        // 2. Fetch Live Delays (All trains) using basic tier
-        const delayData = await fetchTDX('v3/Rail/TRA/LiveTrainDelay', { tier: 'basic' });
+        const cacheKey = `${scheduleUrl}`;
+        const now = Date.now();
+        let allTrains;
 
-        // Create a Map for O(1) delay lookup
-        const delayMap = new Map<string, number>(); // TrainNo -> DelayMinutes
-        if (delayData.LiveTrainDelays) {
-            delayData.LiveTrainDelays.forEach((d: TDXLiveDelay) => {
-                delayMap.set(d.TrainNo, d.DelayTime);
-            });
+        // Check cache first
+        const cached = timetableCache.get(cacheKey);
+        if (cached && cached.expires > now) {
+            allTrains = cached.data;
+            console.log('Using cached timetable data');
+        } else {
+            allTrains = await fetchTDX(scheduleUrl, { tier: 'basic' });
+            timetableCache.set(cacheKey, { data: allTrains, expires: now + CACHE_TTL });
         }
+
+        // 2. Delay data temporarily disabled due to TDX API issues (404/429 errors)
+        // Will show all trains with status: 'unknown'
+        const delayMap = new Map<string, number>();
+
+        // Uncomment below when TDX delay endpoint is working:
+        // try {
+        //     const delayData = await fetchTDX('v3/Rail/TRA/TrainLiveBoard', { tier: 'basic' });
+        //     const liveData = delayData.LiveTrainDelays || delayData.TrainLiveBoardList || [];
+        //     liveData.forEach((d: any) => {
+        //         const delay = d.DelayTime ?? d.Delay ?? 0;
+        //         delayMap.set(d.TrainNo, delay);
+        //     });
+        // } catch (err) {
+        //     console.warn('Failed to fetch delay data, continuing without it:', err);
+        // }
 
         // 3. Filter and Transform trains that stop at both stations in correct order
         const trains: AppTrainInfo[] = (allTrains.TrainTimetables || [])
