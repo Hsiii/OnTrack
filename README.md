@@ -1,8 +1,8 @@
-# MomComePickMeUp
+# OnTrack
 
-A Taiwan railway train schedule app that helps you notify your mom when to pick you up from the station. Built with <a href="https://vite.dev/">Vite</a>, <a href="https://react.dev/">React</a>, and <a href="https://vercel.com/">Vercel</a>.
+A Taiwan railway train schedule app. Built with <a href="https://vite.dev/">Vite</a>, <a href="https://react.dev/">React</a>, and <a href="https://vercel.com/">Vercel</a>.
 
-The app shows real-time train schedules between stations, automatically suggests the next departing train, and provides a quick share feature to send pickup time messages. Perfect for daily commuters who need a simple way to coordinate rides home.
+The app shows real-time train schedules between stations, automatically suggests the next departing train, and provides a quick share feature to send arrival time messages. Perfect for daily commuters who need a simple way to coordinate rides.
 
 ## Features
 
@@ -17,11 +17,11 @@ The app shows real-time train schedules between stations, automatically suggests
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/MomComePickMeUp.git
+    git clone https://github.com/Hsiii/OnTrack.git
     ```
 2. Navigate to the project directory:
     ```bash
-    cd MomComePickMeUp
+    cd OnTrack
     ```
 3. Install dependencies:
     ```bash

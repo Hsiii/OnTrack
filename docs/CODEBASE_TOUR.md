@@ -1,4 +1,4 @@
-# 🗺️ Codebase Tour: Mom Come Pick Me Up!
+# 🗺️ Codebase Tour: OnTrack
 
 ## 📋 Table of Contents
 
@@ -15,7 +15,7 @@
 
 ## 🎯 Project Overview
 
-**Mom Come Pick Me Up!** is a Progressive Web App (PWA) that helps users notify their family when to pick them up from Taiwan Railway (TRA) stations. It integrates with the TDX (Transport Data eXchange) API to provide real-time train schedules and delays.
+**OnTrack** is a Progressive Web App (PWA) that helps users check Taiwan Railway (TRA) train schedules and share arrival times with family. It integrates with the TDX (Transport Data eXchange) API to provide real-time train schedules and delays.
 
 ### Tech Stack
 
@@ -61,7 +61,7 @@
 ## 📁 Directory Structure
 
 ```
-MomComePickMeUp/
+OnTrack/
 ├── 📂 api/                    # Serverless API functions (Vercel)
 │   ├── _utils/
 │   │   └── tdx.ts            # TDX API client with OAuth2
@@ -158,7 +158,8 @@ ShareCard (generates shareable message)
 ```typescript
 filteredOrigin = stations.filter(
     (s) =>
-        s.name.includes(originSearch) || s.nameEn.toLowerCase().includes(originSearch.toLowerCase())
+        s.name.includes(originSearch) ||
+        s.nameEn.toLowerCase().includes(originSearch.toLowerCase())
 );
 ```
 
@@ -180,10 +181,15 @@ filteredOrigin = stations.filter(
 
 ```typescript
 // Find next train departing after current time
-const nextTrainIndex = trains.findIndex((t) => t.departureTime >= currentTimeStr);
+const nextTrainIndex = trains.findIndex(
+    (t) => t.departureTime >= currentTimeStr
+);
 
 // Show context: 1 previous + 2 upcoming trains
-const displayTrains = trains.slice(Math.max(0, nextTrainIndex - 1), nextTrainIndex + 2);
+const displayTrains = trains.slice(
+    Math.max(0, nextTrainIndex - 1),
+    nextTrainIndex + 2
+);
 ```
 
 **Props:**
@@ -360,15 +366,22 @@ TDX_CLIENT_SECRET=your_client_secret
 
 **Persisted Data:**
 
-- `mom_app_origin`: Last selected origin station
-- `mom_app_dest`: Last selected destination station
-- `mom_app_template`: Custom message template
+- `ontrack_origin`: Last selected origin station
+- `ontrack_dest`: Last selected destination station
+- `ontrack_template`: Custom message template
 
 **Usage:**
 
 ```typescript
-const { originId, setOriginId, destId, setDestId, template, setTemplate, resetTemplate } =
-    usePersistence();
+const {
+    originId,
+    setOriginId,
+    destId,
+    setDestId,
+    template,
+    setTemplate,
+    resetTemplate,
+} = usePersistence();
 
 // Auto-saves to localStorage on every update
 setOriginId('1000'); // Saves immediately
@@ -468,8 +481,8 @@ npm run format     # Prettier format
 
 ```json
 {
-    "name": "MomComePickMeUp",
-    "short_name": "MomPickMe",
+    "name": "OnTrack",
+    "short_name": "OnTrack",
     "theme_color": "#0f172a",
     "icons": ["192x192.png", "512x512.png"]
 }
@@ -564,7 +577,7 @@ The project is configured for Vercel deployment:
 6. User clicks "Share"
    → navigator.share() on mobile (system share sheet)
    → navigator.clipboard.writeText() on desktop
-   → Message sent to Mom! 🎉
+   → Message shared! 🎉
 ```
 
 ---

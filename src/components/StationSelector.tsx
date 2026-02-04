@@ -14,7 +14,7 @@ interface StationSelectorProps {
     setDestId: (id: string) => void;
 }
 
-const CACHED_ORIGIN_KEY = 'mom_app_cached_origin';
+const CACHED_ORIGIN_KEY = 'ontrack_cached_origin';
 
 export function StationSelector({
     stations,

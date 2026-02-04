@@ -16,9 +16,9 @@ export default defineConfig({
                 'splash/*.png',
             ],
             manifest: {
-                name: 'MomComePickMeUp',
-                short_name: 'MomPickMe',
-                description: 'Notify Mom when to pick you up from the station',
+                name: 'OnTrack',
+                short_name: 'OnTrack',
+                description: 'Taiwan railway train schedule app',
                 theme_color: '#0f172a',
                 background_color: '#0f172a',
                 display: 'standalone',

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 const STORAGE_KEYS = {
-    ORIGIN: 'mom_app_origin',
-    DEST: 'mom_app_dest',
-    TEMPLATE: 'mom_app_template',
+    ORIGIN: 'ontrack_origin',
+    DEST: 'ontrack_dest',
+    TEMPLATE: 'ontrack_template',
 };
 
 const DEFAULT_TEMPLATE = '{adjusted_time}到{dest}';
