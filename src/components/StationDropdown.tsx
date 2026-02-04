@@ -47,6 +47,30 @@ export function StationDropdown({
     // Normalize search value to match API's character usage (台 → 臺)
     const normalizeSearchValue = (value: string) => value.replace(/台/g, '臺');
 
+    // Check for exact match and auto-select
+    const checkAndAutoSelect = (value: string) => {
+        const normalizedSearch = normalizeSearchValue(value);
+        const matchingStations = stations.filter(
+            (s) =>
+                s.name.includes(value) ||
+                s.name.includes(normalizedSearch) ||
+                s.nameEn.toLowerCase().includes(value.toLowerCase())
+        );
+
+        if (matchingStations.length === 1) {
+            const station = matchingStations[0];
+            if (
+                station.name === value ||
+                station.name === normalizedSearch ||
+                station.nameEn.toLowerCase() === value.toLowerCase()
+            ) {
+                handleSelect(station.id);
+                return true;
+            }
+        }
+        return false;
+    };
+
     const filteredStations = searchValue
         ? stations.filter((s) => {
               const normalizedSearch = normalizeSearchValue(searchValue);
@@ -80,8 +104,11 @@ export function StationDropdown({
                 placeholder={placeholder}
                 value={displayValue}
                 onChange={(e) => {
-                    setSearchValue(e.target.value);
-                    setIsOpen(true);
+                    const value = e.target.value;
+                    if (!checkAndAutoSelect(value)) {
+                        setSearchValue(value);
+                        setIsOpen(true);
+                    }
                 }}
                 onFocus={() => {
                     setIsFocused(true);
