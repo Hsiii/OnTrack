@@ -1,3 +1,25 @@
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+    padding: 1rem 1.25rem;
+    margin: -20px -20px 1.5rem -20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-header-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.app-header-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
 .app-container {
     width: 100%;
 }

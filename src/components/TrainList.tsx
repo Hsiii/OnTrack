@@ -174,98 +174,101 @@ export function TrainList({
         return <div className='train-list-empty'>完了 回不了家了</div>;
 
     return (
-        <div className='train-list-container'>
-            <span className='label-dim'>選擇列車</span>
+        <div>
+            <span className='label-dim'>選擇班次</span>
 
-            {(shouldShowLoading ? [1, 2, 3] : trains).map((train, idx) => {
-                if (shouldShowLoading) {
-                    // Render skeleton cards
+            <div className='train-list-container'>
+                {(shouldShowLoading ? [1, 2, 3] : trains).map((train, idx) => {
+                    if (shouldShowLoading) {
+                        // Render skeleton cards
+                        return (
+                            <div
+                                key={idx}
+                                className='glass-panel train-card skeleton-card'
+                            >
+                                <div className='train-card-left'>
+                                    <div className='train-card-time-row'>
+                                        <span className='skeleton skeleton-time'></span>
+                                        <span className='train-card-arrow skeleton-arrow'>
+                                            ➔
+                                        </span>
+                                        <span className='skeleton skeleton-time'></span>
+                                    </div>
+                                    <div className='skeleton skeleton-details'></div>
+                                </div>
+                                <div className='train-card-right'>
+                                    <span className='skeleton skeleton-badge'></span>
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    // Render actual train data
+                    const trainData = train as TrainInfo;
+                    const isSelected = trainData.trainNo === selectedTrainNo;
+                    const now = new Date();
+                    const currentTimeStr = now.toLocaleTimeString('en-CA', {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: 'Asia/Taipei',
+                    });
+                    const isNext =
+                        trainData.departureTime >= currentTimeStr &&
+                        !trains.some(
+                            (t) =>
+                                (t as TrainInfo).departureTime >=
+                                    currentTimeStr &&
+                                (t as TrainInfo).departureTime <
+                                    trainData.departureTime
+                        );
+
                     return (
                         <div
-                            key={idx}
-                            className='glass-panel train-card skeleton-card'
+                            key={trainData.trainNo}
+                            className={`glass-panel clickable-item train-card ${isSelected ? 'selected' : ''}`}
+                            onClick={() => onSelect(trainData)}
                         >
                             <div className='train-card-left'>
                                 <div className='train-card-time-row'>
-                                    <span className='skeleton skeleton-time'></span>
-                                    <span className='train-card-arrow skeleton-arrow'>
-                                        ➔
+                                    <span className='train-card-departure-time'>
+                                        {trainData.departureTime}
                                     </span>
-                                    <span className='skeleton skeleton-time'></span>
+                                    <span className='train-card-arrow'>➔</span>
+                                    <span className='train-card-arrival-time'>
+                                        {trainData.arrivalTime}
+                                    </span>
+                                    {isNext && (
+                                        <Badge
+                                            variant='success'
+                                            className='train-card-next-badge'
+                                        >
+                                            Next
+                                        </Badge>
+                                    )}
                                 </div>
-                                <div className='skeleton skeleton-details'></div>
+                                <div className='train-card-details'>
+                                    {parseTrainType(trainData.trainType)}{' '}
+                                    {trainData.trainNo}
+                                </div>
                             </div>
                             <div className='train-card-right'>
-                                <span className='skeleton skeleton-badge'></span>
+                                <Badge
+                                    variant={
+                                        trainData.status === 'delayed'
+                                            ? 'danger'
+                                            : 'success'
+                                    }
+                                >
+                                    {trainData.delay && trainData.delay > 0
+                                        ? `+${trainData.delay} min`
+                                        : 'On Time'}
+                                </Badge>
                             </div>
                         </div>
                     );
-                }
-
-                // Render actual train data
-                const trainData = train as TrainInfo;
-                const isSelected = trainData.trainNo === selectedTrainNo;
-                const now = new Date();
-                const currentTimeStr = now.toLocaleTimeString('en-CA', {
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: 'Asia/Taipei',
-                });
-                const isNext =
-                    trainData.departureTime >= currentTimeStr &&
-                    !trains.some(
-                        (t) =>
-                            (t as TrainInfo).departureTime >= currentTimeStr &&
-                            (t as TrainInfo).departureTime <
-                                trainData.departureTime
-                    );
-
-                return (
-                    <div
-                        key={trainData.trainNo}
-                        className={`glass-panel clickable-item train-card ${isSelected ? 'selected' : ''}`}
-                        onClick={() => onSelect(trainData)}
-                    >
-                        <div className='train-card-left'>
-                            <div className='train-card-time-row'>
-                                <span className='train-card-departure-time'>
-                                    {trainData.departureTime}
-                                </span>
-                                <span className='train-card-arrow'>➔</span>
-                                <span className='train-card-arrival-time'>
-                                    {trainData.arrivalTime}
-                                </span>
-                                {isNext && (
-                                    <Badge
-                                        variant='success'
-                                        className='train-card-next-badge'
-                                    >
-                                        Next
-                                    </Badge>
-                                )}
-                            </div>
-                            <div className='train-card-details'>
-                                {parseTrainType(trainData.trainType)}{' '}
-                                {trainData.trainNo}
-                            </div>
-                        </div>
-                        <div className='train-card-right'>
-                            <Badge
-                                variant={
-                                    trainData.status === 'delayed'
-                                        ? 'danger'
-                                        : 'success'
-                                }
-                            >
-                                {trainData.delay && trainData.delay > 0
-                                    ? `+${trainData.delay} min`
-                                    : 'On Time'}
-                            </Badge>
-                        </div>
-                    </div>
-                );
-            })}
+                })}
+            </div>
         </div>
     );
 }

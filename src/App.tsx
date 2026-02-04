@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 
 import './App.css';
 
+import { TrainFront } from 'lucide-react';
+
 import { api } from './api/client';
 import { InitialLoadingScreen } from './components/InitialLoadingScreen';
 import { ShareCard } from './components/ShareCard';
@@ -37,15 +39,26 @@ function App() {
     return (
         <>
             {isInitialLoading && <InitialLoadingScreen />}
+            <header className='app-header'>
+                <TrainFront
+                    className='app-header-icon'
+                    size={64}
+                    strokeWidth={2}
+                />
+                <h1 className='app-header-title'>OnTrack</h1>
+            </header>
             <div className='app-container'>
                 <main className='app-main'>
-                    <StationSelector
-                        stations={stations}
-                        originId={originId}
-                        setOriginId={setOriginId}
-                        destId={destId}
-                        setDestId={setDestId}
-                    />
+                    <div>
+                        <span className='label-dim'>選擇路線</span>
+                        <StationSelector
+                            stations={stations}
+                            originId={originId}
+                            setOriginId={setOriginId}
+                            destId={destId}
+                            setDestId={setDestId}
+                        />
+                    </div>
 
                     {originId && destId && (
                         <TrainList
