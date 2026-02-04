@@ -1,9 +1,6 @@
 .initial-loading-screen {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-color: var(--color-bg);
     display: flex;
     align-items: center;
@@ -11,14 +8,9 @@
     z-index: 9999;
 }
 
-.initial-loading-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-}
-
 .initial-loading-icon {
+    width: 100px;
+    height: 100px;
     color: var(--color-primary);
     animation: trainPulse 2s ease-in-out infinite;
 }
