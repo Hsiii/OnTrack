@@ -61,18 +61,18 @@
 }
 
 .train-card-departure-time {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
 }
 
 .train-card-arrow {
-    font-size: 1rem;
+    font-size: var(--text-base);
     color: var(--color-text-dim);
 }
 
 .train-card-arrival-time {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
 }
 
 .train-card-next-badge {
@@ -81,7 +81,7 @@
 }
 
 .train-card-details {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     color: var(--color-text-dim);
 }
 
@@ -115,7 +115,7 @@
     width: 50px;
     height: 24px;
     line-height: 24px;
-    font-size: 1.2rem;
+    font-size: var(--text-lg);
 }
 
 .skeleton-arrow {
@@ -123,7 +123,7 @@
     width: 1rem;
     height: 1rem;
     line-height: 1rem;
-    font-size: 1rem;
+    font-size: var(--text-base);
 }
 
 .skeleton-details {

@@ -15,8 +15,8 @@
 
 .app-header-title {
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
     letter-spacing: 0.02em;
 }
 
