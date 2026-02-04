@@ -8,6 +8,13 @@
     border-bottom: 1px solid var(--color-border);
 }
 
+.app-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
 .app-header-icon {
     width: 28px;
     height: 28px;
@@ -20,8 +27,56 @@
     letter-spacing: 0.02em;
 }
 
+.app-header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.settings-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: none;
+    color: var(--color-text-dim);
+    cursor: pointer;
+    transition:
+        color 0.2s,
+        transform 0.2s;
+}
+
+.settings-button.active {
+    color: var(--color-primary);
+}
+
+.settings-button svg {
+    transition: transform 0.3s ease;
+}
+
+.settings-button.active svg {
+    transform: rotate(-90deg);
+}
+
 .app-container {
     width: 100%;
+}
+
+.app-settings-panel {
+    max-height: 0;
+    opacity: 0;
+    transition:
+        max-height 0.15s ease,
+        opacity 0.3s ease;
+}
+
+.app-settings-panel.open {
+    max-height: 300px;
+    opacity: 1;
+    transition:
+        max-height 0.3s ease,
+        opacity 0.3s ease;
 }
 
 .app-main {

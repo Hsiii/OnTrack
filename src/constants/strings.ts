@@ -32,4 +32,10 @@ export const STRINGS = {
 
     // Alt Text
     LINE_ICON_ALT: 'Line',
+
+    // Settings
+    SETTINGS_AUTO_DETECT_ORIGIN: '自動偵測起點站',
+    SETTINGS_ENABLE_LOCATION: '啟用定位',
+    SETTINGS_DEFAULT_DESTINATION: '設定預設目的地',
+    SETTINGS_SELECT_STATION: '選擇車站',
 } as const;

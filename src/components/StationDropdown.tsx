@@ -96,11 +96,13 @@ export function StationDropdown({
     const displayValue =
         isFocused || isOpen ? searchValue : selectedStation?.name || '';
 
+    const hasMatches = isOpen && filteredStations.length > 0;
+
     return (
         <div ref={ref} className='station-input-wrapper'>
             <input
                 type='text'
-                className='search-input station-input'
+                className={`search-input station-input ${hasMatches ? 'open' : ''}`}
                 placeholder={placeholder}
                 value={displayValue}
                 onChange={(e) => {
@@ -119,7 +121,7 @@ export function StationDropdown({
                     setIsFocused(false);
                 }}
             />
-            {isOpen && (
+            {hasMatches && (
                 <div className='station-dropdown'>
                     {filteredStations.map((s) => (
                         <div

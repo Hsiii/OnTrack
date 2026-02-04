@@ -1,0 +1,103 @@
+.settings-section {
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 2rem;
+    position: relative;
+    z-index: 1001;
+}
+
+.settings-spacer {
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.settings-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.settings-item-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-dim);
+    font-weight: var(--font-medium);
+}
+
+.settings-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    height: 4rem;
+    padding: 0 1rem;
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+.settings-item .station-dropdown {
+    z-index: 1002;
+}
+
+.settings-switch-icon {
+    color: var(--color-text-dim);
+}
+
+/* Native toggle switch with primary color */
+.settings-switch {
+    position: relative;
+    width: 48px;
+    height: 28px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--color-border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.settings-switch::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: var(--color-text);
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.settings-switch:checked {
+    background: var(--color-primary);
+}
+
+.settings-switch:checked::before {
+    transform: translateX(20px);
+}
+
+.settings-dropdown-wrapper {
+    position: relative;
+}
+
+.settings-dropdown-select {
+    width: 100%;
+    height: 4rem;
+    text-align: center;
+    padding: 0.6rem;
+    font-size: var(--text-base);
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.settings-dropdown-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}

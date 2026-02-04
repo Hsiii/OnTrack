@@ -5,5 +5,6 @@ export { Badge } from './Badge';
 export { IconButton } from './IconButton';
 export { InitialLoadingScreen } from './InitialLoadingScreen';
 export { LoadingSpinner } from './LoadingSpinner';
+export { Settings } from './Settings';
 export { StationDropdown } from './StationDropdown';
 export { TrainListSkeleton } from './TrainListSkeleton';
