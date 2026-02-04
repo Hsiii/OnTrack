@@ -18,7 +18,7 @@ export const STRINGS = {
 
     // Error Messages
     FAILED_TO_LOAD_SCHEDULE: '無法取得時刻表',
-    NO_TRAINS_AVAILABLE: '完了 回不了家了',
+    NO_TRAINS_AVAILABLE: '查無可搭乘班次',
 
     // Placeholder Messages
     SELECT_STATIONS_PROMPT: '選擇出發及到達車站以查詢時刻表',
