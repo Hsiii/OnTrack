@@ -40,7 +40,7 @@ export function ShareCard({ train, destName }: ShareCardProps) {
 
     const handleShareLine = () => {
         const encodedMessage = encodeURIComponent(message);
-        window.open(`https://line.me/R/msg/text/?${encodedMessage}`, '_blank');
+        window.location.href = `https://line.me/R/msg/text/?${encodedMessage}`;
     };
 
     const handleShare = async () => {
