@@ -13,6 +13,7 @@ interface StationSelectorProps {
     setOriginId: (id: string) => void;
     destId: string;
     setDestId: (id: string) => void;
+    defaultDestId?: string;
 }
 
 const CACHED_ORIGIN_KEY = 'ontrack_cached_origin';
@@ -23,12 +24,14 @@ export function StationSelector({
     setOriginId,
     destId,
     setDestId,
+    defaultDestId,
 }: StationSelectorProps) {
     const [originSearch, setOriginSearch] = useState('');
     const [destSearch, setDestSearch] = useState('');
     const [originDropdownOpen, setOriginDropdownOpen] = useState(false);
     const [destDropdownOpen, setDestDropdownOpen] = useState(false);
     const hasAutoSelected = useRef(false);
+    const hasAutoFilledDest = useRef(false);
 
     // Auto-select nearest station on load
     useEffect(() => {
@@ -81,6 +84,24 @@ export function StationSelector({
             }
         );
     }, [stations, setOriginId]);
+
+    // Auto-fill destination with default destination
+    useEffect(() => {
+        if (
+            stations.length === 0 ||
+            hasAutoFilledDest.current ||
+            !defaultDestId ||
+            destId
+        )
+            return;
+
+        hasAutoFilledDest.current = true;
+
+        // Check if defaultDestId is a valid station
+        if (stations.find((s) => s.id === defaultDestId)) {
+            setDestId(defaultDestId);
+        }
+    }, [stations, defaultDestId, destId, setDestId]);
 
     const originStation = stations.find((s) => s.id === originId);
     const destStation = stations.find((s) => s.id === destId);
