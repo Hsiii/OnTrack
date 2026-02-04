@@ -4,8 +4,8 @@
     justify-content: center;
     padding: 10px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--color-card-border);
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-border);
     color: var(--color-text);
     transition:
         background 0.2s,
@@ -14,7 +14,7 @@
 }
 
 .icon-button:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-border);
 }
 
 .icon-button:active {

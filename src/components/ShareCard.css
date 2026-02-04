@@ -6,8 +6,8 @@
 
 .share-card-input {
     flex: 1;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-border);
     color: var(--color-text);
     padding: 0.75rem 1rem;
     font-family: inherit;
@@ -25,11 +25,11 @@
 }
 
 .share-card-button.line-button {
-    background: #00c300;
+    background: var(--color-line);
 }
 
 .share-card-button.line-button:hover {
-    background: #00a000;
+    filter: brightness(0.85);
 }
 
 .share-card-button.share-button {

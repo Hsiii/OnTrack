@@ -155,7 +155,7 @@ export function TrainList({
 
     if (error)
         return (
-            <div className='glass-panel train-list-error'>
+            <div className='card-panel train-list-error'>
                 <div className='train-list-error-message'>{error}</div>
                 <button
                     onClick={fetchSchedule}
@@ -189,7 +189,7 @@ export function TrainList({
                         return (
                             <div
                                 key={idx}
-                                className='glass-panel train-card skeleton-card'
+                                className='card-panel train-card skeleton-card'
                             >
                                 <div className='train-card-left'>
                                     <div className='train-card-time-row'>
@@ -231,7 +231,7 @@ export function TrainList({
                     return (
                         <div
                             key={trainData.trainNo}
-                            className={`glass-panel clickable-item train-card ${isSelected ? 'selected' : ''}`}
+                            className={`card-panel clickable-item train-card ${isSelected ? 'selected' : ''}`}
                             onClick={() => onSelect(trainData)}
                         >
                             <div className='train-card-left'>

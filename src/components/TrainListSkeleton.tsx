@@ -9,7 +9,7 @@ export function TrainListSkeleton() {
                 {[1, 2, 3].map((i) => (
                     <div
                         key={i}
-                        className='glass-panel train-card skeleton-card'
+                        className='card-panel train-card skeleton-card'
                     >
                         <div className='train-card-left'>
                             <div className='train-card-time-row'>

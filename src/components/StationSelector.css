@@ -15,8 +15,8 @@
     text-align: center;
     padding: 0.6rem;
     font-size: var(--text-base);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     color: var(--color-text);
 }
@@ -29,8 +29,8 @@
     max-height: 300px;
     overflow-y: auto;
     text-align: center;
-    background: var(--color-card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     z-index: 1000;
 }
@@ -39,15 +39,15 @@
     padding: 0.6rem;
     cursor: pointer;
     background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--color-bg-light);
 }
 
 .station-dropdown-item.selected {
-    background: rgba(56, 189, 248, 0.1);
+    background: var(--color-primary-subtle);
 }
 
 .station-dropdown-item:hover:not(.selected) {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-bg-light);
 }
 
 .station-dropdown-item-text {

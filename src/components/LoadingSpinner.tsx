@@ -6,7 +6,7 @@ interface LoadingSpinnerProps {
 
 export function LoadingSpinner({ message }: LoadingSpinnerProps) {
     return (
-        <div className='glass-panel loading-spinner-container'>
+        <div className='card-panel loading-spinner-container'>
             <div className='spinner loading-spinner'></div>
             {message && (
                 <div className='loading-spinner-message'>{message}</div>

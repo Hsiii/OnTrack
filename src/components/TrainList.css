@@ -29,14 +29,14 @@
     justify-content: space-between;
     align-items: center;
     border: 2px solid transparent;
-    background: var(--color-card-bg);
+    background: var(--color-bg-light);
     transition: all 0.2s ease;
     animation: none;
 }
 
 .train-card.selected {
     border: 2px solid var(--color-primary);
-    background: rgba(56, 189, 248, 0.1);
+    background: var(--color-primary-subtle);
 }
 
 .train-card.skeleton-card {
@@ -77,7 +77,7 @@
 
 .train-card-next-badge {
     background: var(--color-primary);
-    color: #000;
+    color: var(--color-bg-light);
 }
 
 .train-card-details {
