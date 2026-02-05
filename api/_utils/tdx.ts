@@ -61,6 +61,87 @@ export interface TDXOptions {
     tier?: TDXTier;
     /** Response format: JSON or XML (default: JSON) */
     format?: TDXFormat;
+    /** If-Modified-Since header value for conditional requests */
+    ifModifiedSince?: string;
+}
+
+export interface TDXResponse<T> {
+    data: T;
+    lastModified: string | null;
+    notModified: boolean;
+}
+
+/**
+ * Fetch data from TDX (Transport Data eXchange) API with conditional request support
+ * @param path - API endpoint path (e.g., 'v3/Rail/TRA/Station')
+ * @param options - Request options
+ * @returns Object with data, lastModified header, and notModified flag
+ * @throws Error if the request fails
+ */
+export async function fetchTDXWithCache<T>(
+    path: string,
+    options: TDXOptions = {}
+): Promise<TDXResponse<T | null>> {
+    const {
+        searchParams = {},
+        tier = 'basic',
+        format = 'JSON',
+        ifModifiedSince,
+    } = options;
+
+    const token = await getAccessToken();
+    const url = new URL(`https://tdx.transportdata.tw/api/${tier}/${path}`);
+
+    // Add all search parameters
+    Object.entries(searchParams).forEach(([key, value]) =>
+        url.searchParams.append(key, value)
+    );
+
+    // Add required $format parameter
+    url.searchParams.append('$format', format);
+
+    const headers: Record<string, string> = {
+        'Accept': 'application/json',
+        'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    };
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Add If-Modified-Since header for conditional requests
+    if (ifModifiedSince) {
+        headers['If-Modified-Since'] = ifModifiedSince;
+    }
+
+    const response = await fetch(url.toString(), { headers });
+
+    // Handle 304 Not Modified - data hasn't changed
+    if (response.status === 304) {
+        console.log('TDX returned 304 Not Modified for:', path);
+        return {
+            data: null,
+            lastModified: ifModifiedSince || null,
+            notModified: true,
+        };
+    }
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(
+            `TDX API Error: ${response.status} ${response.statusText} - ${errorBody}`
+        );
+    }
+
+    const lastModified = response.headers.get('Last-Modified');
+    const data = await response.json();
+
+    return {
+        data,
+        lastModified,
+        notModified: false,
+    };
 }
 
 /**

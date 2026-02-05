@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 import type { TrainInfo as AppTrainInfo } from '../src/types.js';
-import { fetchTDX } from './_utils/tdx.js';
+import { fetchTDX, fetchTDXWithCache } from './_utils/tdx.js';
 
 // Simple in-memory cache for timetable data
 const timetableCache = new Map<
@@ -10,9 +10,12 @@ const timetableCache = new Map<
 >();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-// Cache for real-time delay data (shorter TTL since it changes more frequently)
-let delayCache: { data: Map<string, number>; expires: number } | null = null;
-const DELAY_CACHE_TTL = 30 * 1000; // 30 seconds
+// Cache for real-time delay data with Last-Modified support
+// TDX updates TrainLiveBoard when trains leave stations (~2-5 min intervals)
+let delayCache: {
+    data: Map<string, number>;
+    lastModified: string | null;
+} | null = null;
 
 interface TDXStopTime {
     StationID: string;
@@ -92,21 +95,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             });
         }
 
-        // 2. Fetch real-time delay data from TrainLiveBoard (with caching)
+        // 2. Fetch real-time delay data from TrainLiveBoard (with conditional request)
+        // TDX returns 304 Not Modified if data hasn't changed since lastModified
         let delayMap: Map<string, number>;
 
-        if (delayCache && delayCache.expires > now) {
-            delayMap = delayCache.data;
-            console.log('Using cached delay data');
-        } else {
-            delayMap = new Map<string, number>();
-            try {
-                const delayData = await fetchTDX('v3/Rail/TRA/TrainLiveBoard', {
-                    tier: 'basic',
-                });
+        try {
+            const response = await fetchTDXWithCache<{
+                TrainLiveBoards?: { TrainNo: string; DelayTime?: number }[];
+                TrainLiveBoardList?: { TrainNo: string; DelayTime?: number }[];
+            }>('v3/Rail/TRA/TrainLiveBoard', {
+                tier: 'basic',
+                ifModifiedSince: delayCache?.lastModified || undefined,
+            });
+
+            if (response.notModified && delayCache) {
+                // Data hasn't changed, reuse cached data
+                delayMap = delayCache.data;
+                console.log('TrainLiveBoard not modified, using cached data');
+            } else if (response.data) {
+                // New data received, update cache
+                delayMap = new Map<string, number>();
                 const liveData =
-                    delayData.TrainLiveBoards ||
-                    delayData.TrainLiveBoardList ||
+                    response.data.TrainLiveBoards ||
+                    response.data.TrainLiveBoardList ||
                     [];
                 liveData.forEach(
                     (d: { TrainNo: string; DelayTime?: number }) => {
@@ -114,13 +125,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         delayMap.set(d.TrainNo, delay);
                     }
                 );
-                delayCache = { data: delayMap, expires: now + DELAY_CACHE_TTL };
-            } catch (err) {
-                console.warn(
-                    'Failed to fetch delay data, continuing without it:',
-                    err
+                delayCache = {
+                    data: delayMap,
+                    lastModified: response.lastModified,
+                };
+                console.log(
+                    'TrainLiveBoard updated, lastModified:',
+                    response.lastModified
                 );
+            } else {
+                // Fallback to cached or empty
+                delayMap = delayCache?.data || new Map<string, number>();
             }
+        } catch (err) {
+            console.warn(
+                'Failed to fetch delay data, continuing without it:',
+                err
+            );
+            delayMap = delayCache?.data || new Map<string, number>();
         }
 
         // Cache schedule for 2 minutes on CDN, allow stale for 5 minutes while revalidating
