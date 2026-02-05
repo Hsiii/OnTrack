@@ -10,6 +10,10 @@ const timetableCache = new Map<
 >();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Cache for real-time delay data (shorter TTL since it changes more frequently)
+let delayCache: { data: Map<string, number>; expires: number } | null = null;
+const DELAY_CACHE_TTL = 30 * 1000; // 30 seconds
+
 interface TDXStopTime {
     StationID: string;
     StationName: { Zh_tw: string };
@@ -88,24 +92,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             });
         }
 
-        // 2. Fetch real-time delay data from TrainLiveBoard
-        const delayMap = new Map<string, number>();
+        // 2. Fetch real-time delay data from TrainLiveBoard (with caching)
+        let delayMap: Map<string, number>;
 
-        try {
-            const delayData = await fetchTDX('v3/Rail/TRA/TrainLiveBoard', {
-                tier: 'basic',
-            });
-            const liveData =
-                delayData.TrainLiveBoards || delayData.TrainLiveBoardList || [];
-            liveData.forEach((d: { TrainNo: string; DelayTime?: number }) => {
-                const delay = d.DelayTime ?? 0;
-                delayMap.set(d.TrainNo, delay);
-            });
-        } catch (err) {
-            console.warn(
-                'Failed to fetch delay data, continuing without it:',
-                err
-            );
+        if (delayCache && delayCache.expires > now) {
+            delayMap = delayCache.data;
+            console.log('Using cached delay data');
+        } else {
+            delayMap = new Map<string, number>();
+            try {
+                const delayData = await fetchTDX('v3/Rail/TRA/TrainLiveBoard', {
+                    tier: 'basic',
+                });
+                const liveData =
+                    delayData.TrainLiveBoards ||
+                    delayData.TrainLiveBoardList ||
+                    [];
+                liveData.forEach(
+                    (d: { TrainNo: string; DelayTime?: number }) => {
+                        const delay = d.DelayTime ?? 0;
+                        delayMap.set(d.TrainNo, delay);
+                    }
+                );
+                delayCache = { data: delayMap, expires: now + DELAY_CACHE_TTL };
+            } catch (err) {
+                console.warn(
+                    'Failed to fetch delay data, continuing without it:',
+                    err
+                );
+            }
         }
 
         // Cache schedule for 2 minutes on CDN, allow stale for 5 minutes while revalidating
