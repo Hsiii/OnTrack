@@ -93,12 +93,12 @@ const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 ### 2c. Real-Time Delay Data (TrainLiveBoard)
 
-| Property | Value                                                                      |
-| -------- | -------------------------------------------------------------------------- |
-| Location | Module-level variable                                                      |
-| Strategy | **Minimum TTL (30s) + Conditional requests** (`If-Modified-Since` / `304`) |
-| Source   | `v3/Rail/TRA/TrainLiveBoard`                                               |
-| File     | [api/schedule.ts](../api/schedule.ts)                                      |
+| Property | Value                                                                       |
+| -------- | --------------------------------------------------------------------------- |
+| Location | Module-level variable                                                       |
+| Strategy | **Minimum TTL (5min) + Conditional requests** (`If-Modified-Since` / `304`) |
+| Source   | `v3/Rail/TRA/TrainLiveBoard`                                                |
+| File     | [api/schedule.ts](../api/schedule.ts)                                       |
 
 ```typescript
 let delayCache: {
@@ -106,7 +106,7 @@ let delayCache: {
     lastModified: string | null;
     expires: number;
 } | null = null;
-const DELAY_CACHE_MIN_TTL = 30 * 1000; // 30 seconds minimum between TDX calls
+const DELAY_CACHE_MIN_TTL = 5 * 60 * 1000; // 5 minutes minimum between TDX calls
 
 // Within TTL: Return cached data (no API call)
 if (delayCache && delayCache.expires > now) {
@@ -122,17 +122,17 @@ else {
 
 **How it works:**
 
-1. **Within 30s TTL**: Return cached data immediately (no TDX API call)
-2. **After 30s TTL**: Make conditional request with `If-Modified-Since`
-3. **304 Not Modified**: Reuse cached data, extend TTL by 30s
+1. **Within 5min TTL**: Return cached data immediately (no TDX API call)
+2. **After 5min TTL**: Make conditional request with `If-Modified-Since`
+3. **304 Not Modified**: Reuse cached data, extend TTL by 5min
 4. **200 OK**: Update cache with new data
 
 **Why this hybrid approach:**
 
 - TDX updates TrainLiveBoard when trains leave stations (~2-5 min intervals)
-- 30s minimum TTL prevents excessive API calls during high traffic
+- 5min minimum TTL limits API calls to ~170/day (fits within 3,000/month budget)
 - `If-Modified-Since` ensures we get fresh data when TDX actually updates
-- Combines the best of TTL-based and conditional caching
+- Supports ~500 users/month with 1-3 uses each
 
 ---
 
@@ -264,12 +264,12 @@ const STORAGE_KEYS = {
 
 ### What Gets Cached vs. Always Fresh
 
-| Data Type        | Caching   | Max Staleness      | Rationale                                    |
-| ---------------- | --------- | ------------------ | -------------------------------------------- |
-| Station list     | Heavy     | ~8 days            | Stations rarely change                       |
-| Train schedule   | Heavy     | ~1 hour            | Static daily data, changes at midnight       |
-| Delay times      | Hybrid    | 30s + event-driven | Min TTL + `If-Modified-Since` for efficiency |
-| User preferences | Permanent | N/A                | User-controlled                              |
+| Data Type        | Caching   | Max Staleness       | Rationale                                    |
+| ---------------- | --------- | ------------------- | -------------------------------------------- |
+| Station list     | Heavy     | ~8 days             | Stations rarely change                       |
+| Train schedule   | Heavy     | ~1 hour             | Static daily data, changes at midnight       |
+| Delay times      | Hybrid    | 5min + event-driven | Min TTL + `If-Modified-Since` for efficiency |
+| User preferences | Permanent | N/A                 | User-controlled                              |
 
 ### Cache Invalidation Strategy
 

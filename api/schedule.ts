@@ -19,7 +19,7 @@ let delayCache: {
     lastModified: string | null;
     expires: number;
 } | null = null;
-const DELAY_CACHE_MIN_TTL = 30 * 1000; // 30 seconds minimum between TDX calls
+const DELAY_CACHE_MIN_TTL = 5 * 60 * 1000; // 5 minutes minimum between TDX calls
 
 interface TDXStopTime {
     StationID: string;
