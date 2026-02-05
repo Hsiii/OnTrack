@@ -13,17 +13,26 @@ This document describes the multi-layer caching strategy used in OnTrack to opti
 │      │              │                     │             │                    │
 │      │         [In-Memory]           [Edge Cache]  [localStorage]            │
 │      │         - Token: ~1hr         - Stations:   - User prefs             │
-│      │         - Timetable: 5min       1hr+24hr   - Station IDs             │
-│      │         - Stations: 1hr       - Schedule:                            │
-│      │                                 1min+5min                             │
+│      │         - Stations: 24hr        24hr+7d     - Station IDs             │
+│      │         - Timetable: 1hr      - Schedule:                            │
+│      │         - Delay: 5min+304       1min+5min                             │
 │      │                                     │                                 │
 │      │                                     ▼                                 │
 │      │                              [JS Memory]                              │
-│      │                              - Stations: 1hr                          │
+│      │                              - Stations: 24hr                         │
 │      │                              - In-flight dedup                        │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+**Cache Strategy Summary:**
+
+| Data          | TDX → Serverless       | Serverless → CDN  | CDN → Browser |
+| ------------- | ---------------------- | ----------------- | ------------- |
+| **Stations**  | 24hr TTL               | 24hr + 7d stale   | 24hr JS cache |
+| **Timetable** | 1hr TTL                | 1min + 5min stale | (none)        |
+| **Delay**     | 5min TTL + If-Modified | (via schedule)    | (none)        |
+| **Token**     | ~1hr (until expiry)    | N/A               | N/A           |
 
 ---
 
