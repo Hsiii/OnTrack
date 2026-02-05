@@ -14,6 +14,7 @@ interface StationSelectorProps {
     destId: string;
     setDestId: (id: string) => void;
     defaultDestId?: string;
+    autoDetectOrigin: boolean;
 }
 
 const CACHED_ORIGIN_KEY = 'ontrack_cached_origin';
@@ -25,6 +26,7 @@ export function StationSelector({
     destId,
     setDestId,
     defaultDestId,
+    autoDetectOrigin,
 }: StationSelectorProps) {
     const [originSearch, setOriginSearch] = useState('');
     const [destSearch, setDestSearch] = useState('');
@@ -33,13 +35,28 @@ export function StationSelector({
     const hasAutoSelected = useRef(false);
     const hasAutoFilledDest = useRef(false);
 
-    // Auto-select nearest station on load
+    // Auto-select nearest station when autoDetectOrigin is enabled
     useEffect(() => {
-        if (stations.length === 0 || hasAutoSelected.current) return;
+        if (stations.length === 0) return;
 
-        hasAutoSelected.current = true;
+        // If auto-detect is disabled, use cached origin or first station (only on initial load)
+        if (!autoDetectOrigin) {
+            if (!hasAutoSelected.current && !originId) {
+                hasAutoSelected.current = true;
+                const cachedOriginId = localStorage.getItem(CACHED_ORIGIN_KEY);
+                if (
+                    cachedOriginId &&
+                    stations.find((s) => s.id === cachedOriginId)
+                ) {
+                    setOriginId(cachedOriginId);
+                } else if (stations[0]) {
+                    setOriginId(stations[0].id);
+                }
+            }
+            return;
+        }
 
-        // Try geolocation first for nearest station
+        // Auto-detect is enabled - request geolocation
         if (!navigator.geolocation) {
             // Fallback: select first station
             if (stations[0]) setOriginId(stations[0].id);
@@ -83,7 +100,7 @@ export function StationSelector({
                 }
             }
         );
-    }, [stations, setOriginId]);
+    }, [stations, setOriginId, autoDetectOrigin, originId]);
 
     // Auto-fill destination with default destination
     useEffect(() => {

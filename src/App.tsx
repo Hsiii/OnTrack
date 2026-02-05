@@ -96,6 +96,7 @@ function App() {
                             destId={destId}
                             setDestId={setDestId}
                             defaultDestId={defaultDestId}
+                            autoDetectOrigin={autoDetectOrigin}
                         />
                     </div>
 
