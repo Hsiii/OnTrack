@@ -602,6 +602,7 @@ The project is configured for Vercel deployment:
 ## 📚 Further Reading
 
 - [TDX Rail API Documentation](./TDX_RAIL_API.md)
+- [Cache Mechanics](./CACHE_MECHANICS.md) - All caching strategies used to reduce API calls
 - [Vite Documentation](https://vite.dev/)
 - [React 19 Docs](https://react.dev/)
 - [Vercel Serverless Functions](https://vercel.com/docs/functions)
