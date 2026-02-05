@@ -42,7 +42,8 @@ export function TrainList({
     const [trains, setTrains] = useState<TrainInfo[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [lastFetchTime, setLastFetchTime] = useState<number | null>(null);
+    const [hasData, setHasData] = useState(false);
+    const lastFetchTimeRef = useRef<number | null>(null);
     const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined
     );
@@ -56,8 +57,8 @@ export function TrainList({
         const currentParams = `${originId}-${destId}`;
         if (
             lastFetchParamsRef.current === currentParams &&
-            lastFetchTime &&
-            Date.now() - lastFetchTime < 3000
+            lastFetchTimeRef.current &&
+            Date.now() - lastFetchTimeRef.current < 3000
         ) {
             console.log('Skipping duplicate request within 3 seconds');
             return;
@@ -99,7 +100,8 @@ export function TrainList({
 
                 setTrains(displayTrains);
                 setLoading(false);
-                setLastFetchTime(Date.now());
+                lastFetchTimeRef.current = Date.now();
+                setHasData(true);
 
                 if (recommendedTrain) {
                     onSelect(recommendedTrain);
@@ -110,7 +112,7 @@ export function TrainList({
                 setError(STRINGS.FAILED_TO_LOAD_SCHEDULE);
                 setLoading(false);
             });
-    }, [originId, destId, onSelect, lastFetchTime]);
+    }, [originId, destId, onSelect]);
 
     useEffect(() => {
         // Clear any pending debounced fetch
@@ -145,13 +147,8 @@ export function TrainList({
     }, [fetchSchedule]);
 
     if (!originId || !destId) return null;
-    const date = new Date();
-    // Show loading only if no recent data (older than 2 minutes or no data)
-    const hasRecentData =
-        lastFetchTime &&
-        date !== null &&
-        date.getTime() - lastFetchTime < 120000;
-    const shouldShowLoading = loading && !hasRecentData;
+    // Show loading only if we don't have any data yet
+    const shouldShowLoading = loading && !hasData;
 
     if (error)
         return (
@@ -177,6 +174,18 @@ export function TrainList({
                 {STRINGS.NO_TRAINS_AVAILABLE}
             </div>
         );
+
+    // Compute current time and next train index once (outside the map loop)
+    const now = new Date();
+    const currentTimeStr = now.toLocaleTimeString('en-CA', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Taipei',
+    });
+    const nextTrainNo = trains.find(
+        (t) => t.departureTime >= currentTimeStr
+    )?.trainNo;
 
     return (
         <div>
@@ -211,22 +220,7 @@ export function TrainList({
                     // Render actual train data
                     const trainData = train as TrainInfo;
                     const isSelected = trainData.trainNo === selectedTrainNo;
-                    const now = new Date();
-                    const currentTimeStr = now.toLocaleTimeString('en-CA', {
-                        hour12: false,
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        timeZone: 'Asia/Taipei',
-                    });
-                    const isNext =
-                        trainData.departureTime >= currentTimeStr &&
-                        !trains.some(
-                            (t) =>
-                                (t as TrainInfo).departureTime >=
-                                    currentTimeStr &&
-                                (t as TrainInfo).departureTime <
-                                    trainData.departureTime
-                        );
+                    const isNext = trainData.trainNo === nextTrainNo;
 
                     return (
                         <div
