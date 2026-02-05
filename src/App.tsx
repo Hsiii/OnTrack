@@ -82,6 +82,7 @@ function App() {
                         setAutoDetectOrigin={setAutoDetectOrigin}
                         defaultDestId={defaultDestId}
                         setDefaultDestId={setDefaultDestId}
+                        setDestId={setDestId}
                     />
                 </div>
                 <main className='app-main'>

@@ -102,19 +102,18 @@ export function StationSelector({
         );
     }, [stations, setOriginId, autoDetectOrigin, originId]);
 
-    // Auto-fill destination with default destination
+    // Auto-fill destination with default destination (takes priority over cache)
     useEffect(() => {
         if (
             stations.length === 0 ||
             hasAutoFilledDest.current ||
-            !defaultDestId ||
-            destId
+            !defaultDestId
         )
             return;
 
         hasAutoFilledDest.current = true;
 
-        // Check if defaultDestId is a valid station
+        // Default destination takes priority - always set it if valid
         if (stations.find((s) => s.id === defaultDestId)) {
             setDestId(defaultDestId);
         }

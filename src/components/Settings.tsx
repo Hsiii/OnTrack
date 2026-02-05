@@ -13,6 +13,7 @@ interface SettingsProps {
     setAutoDetectOrigin: (value: boolean) => void;
     defaultDestId: string;
     setDefaultDestId: (id: string) => void;
+    setDestId: (id: string) => void;
 }
 
 export function Settings({
@@ -21,11 +22,17 @@ export function Settings({
     setAutoDetectOrigin,
     defaultDestId,
     setDefaultDestId,
+    setDestId,
 }: SettingsProps) {
     const [destSearch, setDestSearch] = useState('');
     const [destDropdownOpen, setDestDropdownOpen] = useState(false);
 
     const selectedStation = stations.find((s) => s.id === defaultDestId);
+
+    const handleDefaultDestChange = (id: string) => {
+        setDefaultDestId(id);
+        setDestId(id);
+    };
 
     return (
         <div className='settings-section'>
@@ -58,7 +65,7 @@ export function Settings({
                     isOpen={destDropdownOpen}
                     setIsOpen={setDestDropdownOpen}
                     selectedId={defaultDestId}
-                    onSelect={setDefaultDestId}
+                    onSelect={handleDefaultDestChange}
                     placeholder={STRINGS.SETTINGS_SELECT_STATION}
                     selectedStation={selectedStation}
                 />
