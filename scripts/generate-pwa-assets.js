@@ -22,15 +22,17 @@ if (!fs.existsSync(splashDir)) {
 const ICON_SIZE_CSS = 100;
 
 // SVG template for splash screens
-const createSplashSVG = (width, height, dpr) => {
+const createSplashSVG = (width, height, dpr, safeAreaTop = 0) => {
     // Convert CSS pixels to physical pixels using the device pixel ratio
     const iconSize = ICON_SIZE_CSS * dpr;
     const halfIcon = iconSize / 2;
+    // Offset icon down by half safe area so it centers on viewport, not full screen
+    const yOffset = safeAreaTop / 2;
 
     return `
 <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="#0f172a"/>
-  <g transform="translate(${width / 2 - halfIcon}, ${height / 2 - halfIcon})">
+  <g transform="translate(${width / 2 - halfIcon}, ${height / 2 - halfIcon + yOffset})">
     <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/>
       <path d="m9 15-1-1"/>
@@ -61,21 +63,100 @@ const createIconSVG = (size) => `
 </svg>
 `;
 
-// Splash screen sizes for iOS devices (with device pixel ratios)
+// Splash screen sizes for iOS devices (with device pixel ratios and safe area insets)
+// safeAreaTop is the status bar/notch/Dynamic Island height in physical pixels
 const splashSizes = [
-    { name: 'apple-splash-750x1334.png', width: 750, height: 1334, dpr: 2 }, // iPhone SE, 8
-    { name: 'apple-splash-1242x2208.png', width: 1242, height: 2208, dpr: 3 }, // iPhone 8 Plus
-    { name: 'apple-splash-1125x2436.png', width: 1125, height: 2436, dpr: 3 }, // iPhone X, XS, 11 Pro
-    { name: 'apple-splash-828x1792.png', width: 828, height: 1792, dpr: 2 }, // iPhone XR, 11
-    { name: 'apple-splash-1242x2688.png', width: 1242, height: 2688, dpr: 3 }, // iPhone XS Max, 11 Pro Max
-    { name: 'apple-splash-1080x2340.png', width: 1080, height: 2340, dpr: 3 }, // iPhone 12 mini, 13 mini
-    { name: 'apple-splash-1170x2532.png', width: 1170, height: 2532, dpr: 3 }, // iPhone 12, 12 Pro, 13, 13 Pro, 14
-    { name: 'apple-splash-1284x2778.png', width: 1284, height: 2778, dpr: 3 }, // iPhone 12 Pro Max, 13 Pro Max, 14 Plus
-    { name: 'apple-splash-1179x2556.png', width: 1179, height: 2556, dpr: 3 }, // iPhone 14 Pro, 15, 15 Pro
-    { name: 'apple-splash-1290x2796.png', width: 1290, height: 2796, dpr: 3 }, // iPhone 14 Pro Max, 15 Plus, 15 Pro Max
-    { name: 'apple-splash-1536x2048.png', width: 1536, height: 2048, dpr: 2 }, // iPad Mini, iPad Air
-    { name: 'apple-splash-1668x2388.png', width: 1668, height: 2388, dpr: 2 }, // iPad Pro 11"
-    { name: 'apple-splash-2048x2732.png', width: 2048, height: 2732, dpr: 2 }, // iPad Pro 12.9"
+    {
+        name: 'apple-splash-750x1334.png',
+        width: 750,
+        height: 1334,
+        dpr: 2,
+        safeAreaTop: 40,
+    }, // iPhone SE, 8 (20pt * 2)
+    {
+        name: 'apple-splash-1242x2208.png',
+        width: 1242,
+        height: 2208,
+        dpr: 3,
+        safeAreaTop: 60,
+    }, // iPhone 8 Plus (20pt * 3)
+    {
+        name: 'apple-splash-1125x2436.png',
+        width: 1125,
+        height: 2436,
+        dpr: 3,
+        safeAreaTop: 132,
+    }, // iPhone X, XS, 11 Pro (44pt * 3)
+    {
+        name: 'apple-splash-828x1792.png',
+        width: 828,
+        height: 1792,
+        dpr: 2,
+        safeAreaTop: 96,
+    }, // iPhone XR, 11 (48pt * 2)
+    {
+        name: 'apple-splash-1242x2688.png',
+        width: 1242,
+        height: 2688,
+        dpr: 3,
+        safeAreaTop: 132,
+    }, // iPhone XS Max, 11 Pro Max (44pt * 3)
+    {
+        name: 'apple-splash-1080x2340.png',
+        width: 1080,
+        height: 2340,
+        dpr: 3,
+        safeAreaTop: 150,
+    }, // iPhone 12 mini, 13 mini (50pt * 3)
+    {
+        name: 'apple-splash-1170x2532.png',
+        width: 1170,
+        height: 2532,
+        dpr: 3,
+        safeAreaTop: 141,
+    }, // iPhone 12, 12 Pro, 13, 13 Pro, 14 (47pt * 3)
+    {
+        name: 'apple-splash-1284x2778.png',
+        width: 1284,
+        height: 2778,
+        dpr: 3,
+        safeAreaTop: 141,
+    }, // iPhone 12 Pro Max, 13 Pro Max, 14 Plus (47pt * 3)
+    {
+        name: 'apple-splash-1179x2556.png',
+        width: 1179,
+        height: 2556,
+        dpr: 3,
+        safeAreaTop: 177,
+    }, // iPhone 14 Pro, 15, 15 Pro (59pt * 3)
+    {
+        name: 'apple-splash-1290x2796.png',
+        width: 1290,
+        height: 2796,
+        dpr: 3,
+        safeAreaTop: 177,
+    }, // iPhone 14 Pro Max, 15 Plus, 15 Pro Max (59pt * 3)
+    {
+        name: 'apple-splash-1536x2048.png',
+        width: 1536,
+        height: 2048,
+        dpr: 2,
+        safeAreaTop: 40,
+    }, // iPad Mini, iPad Air (20pt * 2)
+    {
+        name: 'apple-splash-1668x2388.png',
+        width: 1668,
+        height: 2388,
+        dpr: 2,
+        safeAreaTop: 40,
+    }, // iPad Pro 11" (20pt * 2)
+    {
+        name: 'apple-splash-2048x2732.png',
+        width: 2048,
+        height: 2732,
+        dpr: 2,
+        safeAreaTop: 40,
+    }, // iPad Pro 12.9" (20pt * 2)
 ];
 
 // Icon sizes
@@ -96,9 +177,12 @@ async function generateAssets() {
         console.log('Then run this script again.\n');
 
         // Create SVG placeholders
-        for (const { name, width, height, dpr } of splashSizes) {
+        for (const { name, width, height, dpr, safeAreaTop } of splashSizes) {
             const svgPath = path.join(splashDir, name.replace('.png', '.svg'));
-            fs.writeFileSync(svgPath, createSplashSVG(width, height, dpr));
+            fs.writeFileSync(
+                svgPath,
+                createSplashSVG(width, height, dpr, safeAreaTop)
+            );
             console.log(
                 `Created SVG placeholder: splash/${name.replace('.png', '.svg')}`
             );
@@ -125,8 +209,8 @@ async function generateAssets() {
     console.log('Generating PWA assets with sharp...\n');
 
     // Generate splash screens
-    for (const { name, width, height, dpr } of splashSizes) {
-        const svg = createSplashSVG(width, height, dpr);
+    for (const { name, width, height, dpr, safeAreaTop } of splashSizes) {
+        const svg = createSplashSVG(width, height, dpr, safeAreaTop);
         await sharp(Buffer.from(svg)).png().toFile(path.join(splashDir, name));
         console.log(`Generated: splash/${name}`);
     }

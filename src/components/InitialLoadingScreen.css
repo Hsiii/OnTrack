@@ -12,17 +12,4 @@
     width: 100px;
     height: 100px;
     color: var(--color-primary);
-    animation: trainPulse 2s ease-in-out infinite;
-}
-
-@keyframes trainPulse {
-    0%,
-    100% {
-        opacity: 0.6;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
 }

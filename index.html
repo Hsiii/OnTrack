@@ -103,26 +103,10 @@
 
         <!-- Critical CSS for initial load - prevents white screen before React hydrates -->
         <style>
-            html,
-            body {
-                margin: 0;
-                padding: 0;
-                background-color: #0f172a;
-                min-height: 100vh;
-                min-height: 100svh;
-            }
-            #root {
-                background-color: #0f172a;
-                min-height: 100vh;
-                min-height: 100svh;
-            }
             /* Native splash screen loading indicator */
             .native-splash {
                 position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
+                inset: 0;
                 background-color: #0f172a;
                 display: flex;
                 align-items: center;
@@ -131,18 +115,6 @@
             }
             .native-splash svg {
                 color: #38bdf8;
-                animation: nativePulse 2s ease-in-out infinite;
-            }
-            @keyframes nativePulse {
-                0%,
-                100% {
-                    opacity: 0.6;
-                    transform: scale(1);
-                }
-                50% {
-                    opacity: 1;
-                    transform: scale(1.05);
-                }
             }
         </style>
 
