@@ -263,11 +263,7 @@ export function StationSelector({
                                 : t('app.enableAutoDetectOrigin')
                         }
                     >
-                        {autoDetectOrigin ? (
-                            <MapPin size={24} />
-                        ) : (
-                            <MapPinOff size={24} />
-                        )}
+                        {autoDetectOrigin ? <MapPin /> : <MapPinOff />}
                     </button>
                 </div>
             </div>
@@ -299,7 +295,6 @@ export function StationSelector({
                             }
                         >
                             <Star
-                                size={24}
                                 fill={isDefaultDest ? 'currentColor' : 'none'}
                             />
                         </button>

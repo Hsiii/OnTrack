@@ -2,11 +2,8 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
     color: var(--color-primary);
-    padding: var(--space-4) var(--space-5);
-    margin: var(--space-neg-5) var(--space-neg-5) var(--space-4)
-        var(--space-neg-5);
-    border-bottom: 1px solid var(--color-border);
 }
 
 .app-header-left {
@@ -41,6 +38,7 @@
 
 .app-container {
     width: 100%;
+    padding-inline: var(--space-5);
 }
 
 .app-main {

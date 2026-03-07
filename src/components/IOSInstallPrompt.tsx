@@ -63,7 +63,7 @@ export function IOSInstallPrompt() {
                 <div className='ios-install-steps'>
                     <div className='ios-install-step'>
                         <div className='ios-install-step-icon'>
-                            <Share size={22} />
+                            <Share />
                         </div>
                         <div className='ios-install-step-text'>
                             <span className='ios-install-step-number'>1</span>
@@ -73,7 +73,7 @@ export function IOSInstallPrompt() {
 
                     <div className='ios-install-step'>
                         <div className='ios-install-step-icon'>
-                            <Plus size={22} />
+                            <Plus />
                         </div>
                         <div className='ios-install-step-text'>
                             <span className='ios-install-step-number'>2</span>

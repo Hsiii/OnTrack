@@ -24,7 +24,8 @@
 }
 
 .train-card {
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    min-height: 4rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -140,6 +141,7 @@
 .train-card-number {
     font-size: var(--text-xs);
     color: var(--color-text-dim);
+    font-variant-numeric: tabular-nums;
 }
 
 .skeleton {
