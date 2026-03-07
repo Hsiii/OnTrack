@@ -11,18 +11,22 @@
 .app-header-left {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25cap;
     flex: 1;
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
 }
 
 .app-header-icon {
-    width: 28px;
-    height: 28px;
+    width: 1.5cap;
+    height: 1.5cap;
+    flex: 0 0 1.5cap;
 }
 
 .app-header-title {
     margin: 0;
-    font-size: var(--text-lg);
+    font-family: inherit;
+    font-size: inherit;
     font-weight: var(--font-bold);
     letter-spacing: 0.02em;
     line-height: 1.2;
