@@ -37,6 +37,138 @@ interface TDXFullTimetable {
     StopTimes: TDXStopTime[];
 }
 
+interface TDXTimetableResponse {
+    TrainTimetables?: TDXFullTimetable[];
+}
+
+async function getTimetableData(
+    scheduleUrl: string,
+    now: number
+): Promise<TDXTimetableResponse> {
+    const cached = timetableCache.get(scheduleUrl);
+    if (cached && cached.expires > now) {
+        console.log('Using cached timetable data');
+        return { TrainTimetables: cached.data };
+    }
+
+    const data = (await fetchTDX(scheduleUrl, {
+        tier: 'basic',
+    })) as TDXTimetableResponse;
+
+    timetableCache.set(scheduleUrl, {
+        data: data.TrainTimetables || [],
+        expires: now + TIMETABLE_CACHE_TTL,
+    });
+
+    return data;
+}
+
+async function getDelayMap(now: number): Promise<Map<string, number>> {
+    if (delayCache && delayCache.expires > now) {
+        console.log('Using cached delay data (within TTL)');
+        return delayCache.data;
+    }
+
+    try {
+        const response = await fetchTDXWithCache<{
+            TrainLiveBoards?: { TrainNo: string; DelayTime?: number }[];
+            TrainLiveBoardList?: {
+                TrainNo: string;
+                DelayTime?: number;
+            }[];
+        }>('v3/Rail/TRA/TrainLiveBoard', {
+            tier: 'basic',
+            ifModifiedSince: delayCache?.lastModified || undefined,
+        });
+
+        if (response.notModified && delayCache) {
+            delayCache.expires = now + DELAY_CACHE_MIN_TTL;
+            console.log(
+                'TrainLiveBoard not modified (304), extending cache TTL'
+            );
+            return delayCache.data;
+        }
+
+        if (!response.data) {
+            return delayCache?.data || new Map<string, number>();
+        }
+
+        const delayMap = new Map<string, number>();
+        const liveData =
+            response.data.TrainLiveBoards ||
+            response.data.TrainLiveBoardList ||
+            [];
+
+        liveData.forEach((train) => {
+            delayMap.set(train.TrainNo, train.DelayTime ?? 0);
+        });
+
+        delayCache = {
+            data: delayMap,
+            lastModified: response.lastModified,
+            expires: now + DELAY_CACHE_MIN_TTL,
+        };
+        console.log(
+            'TrainLiveBoard updated, lastModified:',
+            response.lastModified
+        );
+
+        return delayMap;
+    } catch (err) {
+        console.warn('Failed to fetch delay data, continuing without it:', err);
+        return delayCache?.data || new Map<string, number>();
+    }
+}
+
+function mapTrainToAppTrainInfo(
+    timetable: TDXFullTimetable,
+    origin: string,
+    dest: string,
+    delayMap: Map<string, number>
+): AppTrainInfo | null {
+    const stops = timetable.StopTimes || [];
+    let originStop: TDXStopTime | null = null;
+    let destStop: TDXStopTime | null = null;
+
+    for (const stop of stops) {
+        if (!originStop) {
+            if (stop.StationID === origin) {
+                originStop = stop;
+            }
+            continue;
+        }
+
+        if (stop.StationID === dest) {
+            destStop = stop;
+            break;
+        }
+    }
+
+    if (!originStop || !destStop) {
+        return null;
+    }
+
+    const trainNo = timetable.TrainInfo.TrainNo;
+    const delay = delayMap.get(trainNo);
+
+    let status: 'on-time' | 'delayed' | 'cancelled' | 'unknown' = 'unknown';
+    if (delay !== undefined) {
+        status = delay > 0 ? 'delayed' : 'on-time';
+    }
+
+    return {
+        trainNo,
+        trainType: timetable.TrainInfo.TrainTypeName.Zh_tw,
+        direction: timetable.TrainInfo.Direction,
+        originStation: originStop.StationName.Zh_tw,
+        destinationStation: destStop.StationName.Zh_tw,
+        departureTime: originStop.DepartureTime,
+        arrivalTime: destStop.ArrivalTime,
+        delay: delay || 0,
+        status,
+    };
+}
+
 // Validate station ID format (alphanumeric with optional dash)
 function isValidStationId(id: unknown): id is string {
     return (
@@ -77,93 +209,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
 
     try {
-        // 1. Fetch full day schedule with caching
+        // 1. Fetch schedule and live delay data in parallel where possible
         const scheduleUrl = isToday
             ? `v3/Rail/TRA/DailyTrainTimetable/Today`
             : `v3/Rail/TRA/DailyTrainTimetable/TrainDate/${queryDate}`;
 
-        const cacheKey = `${scheduleUrl}`;
         const now = Date.now();
-        let allTrains;
-
-        // Check cache first
-        const cached = timetableCache.get(cacheKey);
-        if (cached && cached.expires > now) {
-            allTrains = cached.data;
-            console.log('Using cached timetable data');
-        } else {
-            allTrains = await fetchTDX(scheduleUrl, { tier: 'basic' });
-            timetableCache.set(cacheKey, {
-                data: allTrains,
-                expires: now + TIMETABLE_CACHE_TTL,
-            });
-        }
-
-        // 2. Fetch real-time delay data from TrainLiveBoard
-        // Uses minimum TTL + If-Modified-Since for optimal caching:
-        // - Within TTL: Return cached data immediately (no API call)
-        // - After TTL: Make conditional request, TDX returns 304 if unchanged
-        let delayMap: Map<string, number>;
-
-        // Check if cache is still within minimum TTL
-        if (delayCache && delayCache.expires > now) {
-            delayMap = delayCache.data;
-            console.log('Using cached delay data (within TTL)');
-        } else {
-            // Cache expired or doesn't exist, make conditional request
-            try {
-                const response = await fetchTDXWithCache<{
-                    TrainLiveBoards?: { TrainNo: string; DelayTime?: number }[];
-                    TrainLiveBoardList?: {
-                        TrainNo: string;
-                        DelayTime?: number;
-                    }[];
-                }>('v3/Rail/TRA/TrainLiveBoard', {
-                    tier: 'basic',
-                    ifModifiedSince: delayCache?.lastModified || undefined,
-                });
-
-                if (response.notModified && delayCache) {
-                    // Data hasn't changed, reuse cached data and extend TTL
-                    delayMap = delayCache.data;
-                    delayCache.expires = now + DELAY_CACHE_MIN_TTL;
-                    console.log(
-                        'TrainLiveBoard not modified (304), extending cache TTL'
-                    );
-                } else if (response.data) {
-                    // New data received, update cache
-                    delayMap = new Map<string, number>();
-                    const liveData =
-                        response.data.TrainLiveBoards ||
-                        response.data.TrainLiveBoardList ||
-                        [];
-                    liveData.forEach(
-                        (d: { TrainNo: string; DelayTime?: number }) => {
-                            const delay = d.DelayTime ?? 0;
-                            delayMap.set(d.TrainNo, delay);
-                        }
-                    );
-                    delayCache = {
-                        data: delayMap,
-                        lastModified: response.lastModified,
-                        expires: now + DELAY_CACHE_MIN_TTL,
-                    };
-                    console.log(
-                        'TrainLiveBoard updated, lastModified:',
-                        response.lastModified
-                    );
-                } else {
-                    // Fallback to cached or empty
-                    delayMap = delayCache?.data || new Map<string, number>();
-                }
-            } catch (err) {
-                console.warn(
-                    'Failed to fetch delay data, continuing without it:',
-                    err
-                );
-                delayMap = delayCache?.data || new Map<string, number>();
-            }
-        }
+        const [allTrains, delayMap] = await Promise.all([
+            getTimetableData(scheduleUrl, now),
+            isToday
+                ? getDelayMap(now)
+                : Promise.resolve(new Map<string, number>()),
+        ]);
 
         // Cache schedule for 2 minutes on CDN, allow stale for 5 minutes while revalidating
         // This reduces load on TDX API while still providing reasonably fresh data
@@ -174,44 +231,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // 3. Filter and Transform trains that stop at both stations in correct order
         const trains: AppTrainInfo[] = (allTrains.TrainTimetables || [])
-            .map((t: TDXFullTimetable) => {
-                const stops = t.StopTimes || [];
-                const originStop = stops.find(
-                    (s: TDXStopTime) => s.StationID === origin
-                );
-                const destStop = stops.find(
-                    (s: TDXStopTime) => s.StationID === dest
-                );
-
-                // Skip if train doesn't stop at both stations
-                if (!originStop || !destStop) return null;
-
-                // Skip if dest comes before origin (wrong direction)
-                const originIdx = stops.indexOf(originStop);
-                const destIdx = stops.indexOf(destStop);
-                if (destIdx <= originIdx) return null;
-
-                const trainNo = t.TrainInfo.TrainNo;
-                const delay = delayMap.get(trainNo);
-
-                let status: 'on-time' | 'delayed' | 'cancelled' | 'unknown' =
-                    'unknown';
-                if (delay !== undefined) {
-                    status = delay > 0 ? 'delayed' : 'on-time';
-                }
-
-                return {
-                    trainNo,
-                    trainType: t.TrainInfo.TrainTypeName.Zh_tw,
-                    direction: t.TrainInfo.Direction,
-                    originStation: originStop.StationName.Zh_tw,
-                    destinationStation: destStop.StationName.Zh_tw,
-                    departureTime: originStop.DepartureTime,
-                    arrivalTime: destStop.ArrivalTime,
-                    delay: delay || 0,
-                    status,
-                };
-            })
+            .map((t: TDXFullTimetable) =>
+                mapTrainToAppTrainInfo(t, origin, dest, delayMap)
+            )
             .filter((t: AppTrainInfo | null): t is AppTrainInfo => t !== null);
 
         // Sort by Departure Time (just in case)
