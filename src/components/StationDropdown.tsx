@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Clock3, Search, TrainFront, X } from 'lucide-react';
 
 import { useI18n } from '../i18n';
@@ -61,6 +61,8 @@ function persistRecentStationId(stationId: string) {
     ].slice(0, MAX_RECENT_STATIONS);
 
     localStorage.setItem(RECENT_STATIONS_KEY, JSON.stringify(nextIds));
+
+    return nextIds;
 }
 
 export function StationDropdown({
@@ -78,9 +80,25 @@ export function StationDropdown({
 }: StationDropdownProps) {
     const { t, language } = useI18n();
     const inputRef = useRef<HTMLInputElement>(null);
+    const [recentStationIds, setRecentStationIds] = useState<string[]>(() =>
+        getRecentStationIds()
+    );
+
+    const trimmedSearchValue = searchValue.trim();
 
     const getDisplayStationName = (station: Station) =>
         language === 'en' ? station.nameEn.replace(/_/g, ' ') : station.name;
+
+    const stationMap = useMemo(
+        () =>
+            new Map(
+                stations.map((station): [string, Station] => [
+                    station.id,
+                    station,
+                ])
+            ),
+        [stations]
+    );
 
     const focusSearchInput = () => {
         window.requestAnimationFrame(() => {
@@ -89,13 +107,13 @@ export function StationDropdown({
     };
 
     const handleDismiss = useCallback(() => {
-        if (searchValue.trim() === '') {
+        if (trimmedSearchValue === '') {
             onSelect('');
         }
 
         setSearchValue('');
         setIsOpen(false);
-    }, [onSelect, searchValue, setIsOpen, setSearchValue]);
+    }, [onSelect, setIsOpen, setSearchValue, trimmedSearchValue]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -135,12 +153,16 @@ export function StationDropdown({
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [handleDismiss, isOpen]);
 
-    const recentStations = getRecentStationIds()
-        .map((id) => stations.find((station) => station.id === id))
-        .filter((station): station is Station => Boolean(station));
+    const recentStations = useMemo(
+        () =>
+            recentStationIds
+                .map((id) => stationMap.get(id))
+                .filter((station): station is Station => Boolean(station)),
+        [recentStationIds, stationMap]
+    );
 
     const filteredStations = useMemo(() => {
-        if (!searchValue.trim()) return [];
+        if (!trimmedSearchValue) return [];
 
         const normalizedSearchValue = normalizeSearchValue(searchValue);
         const normalizedEnglishSearchValue =
@@ -165,7 +187,7 @@ export function StationDropdown({
             })
             .sort((a, b) => a.priority - b.priority || a.index - b.index)
             .map(({ station }) => station);
-    }, [searchValue, selectedId, stations]);
+    }, [searchValue, selectedId, stations, trimmedSearchValue]);
 
     const handleSelect = (stationId: string) => {
         const preferredStationId = resolvePreferredStationId(
@@ -180,12 +202,13 @@ export function StationDropdown({
             onCacheSelection(preferredStationId);
         }
 
-        persistRecentStationId(preferredStationId);
+        setRecentStationIds(persistRecentStationId(preferredStationId));
         setSearchValue('');
         setIsOpen(false);
     };
 
     const handleOpen = () => {
+        setRecentStationIds(getRecentStationIds());
         setSearchValue(
             selectedStation
                 ? language === 'en'
@@ -200,9 +223,10 @@ export function StationDropdown({
         setSearchValue(value);
     };
 
-    const visibleStations = searchValue.trim()
-        ? filteredStations
-        : recentStations;
+    const visibleStations = useMemo(
+        () => (trimmedSearchValue ? filteredStations : recentStations),
+        [filteredStations, recentStations, trimmedSearchValue]
+    );
 
     return (
         <div className='station-input-wrapper'>
@@ -295,7 +319,7 @@ export function StationDropdown({
                                         <div className='station-search-list'>
                                             {visibleStations.map((station) => {
                                                 const isRecent =
-                                                    !searchValue.trim();
+                                                    !trimmedSearchValue;
 
                                                 return (
                                                     <button
@@ -324,7 +348,7 @@ export function StationDropdown({
                                                 );
                                             })}
                                         </div>
-                                    ) : searchValue.trim() ? (
+                                    ) : trimmedSearchValue ? (
                                         <div className='station-search-empty'>
                                             {t('station.noMatches')}
                                         </div>
