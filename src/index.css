@@ -50,6 +50,13 @@
     --space-4: 1rem; /* 16px */
     --space-5: 1.25rem; /* 20px */
     --space-6: 1.5rem; /* 24px */
+    --space-8: 2rem; /* 32px */
+    --space-10: 2.5rem; /* 40px */
+    --space-15: 3.75rem; /* 60px */
+
+    --space-neg-2: -0.5rem; /* -8px */
+    --space-neg-3: -0.75rem; /* -12px */
+    --space-neg-5: -1.25rem; /* -20px */
 }
 
 html {
@@ -73,9 +80,8 @@ body {
 #root {
     width: 100%;
     max-width: 480px; /* Mobile-first constraint */
-    padding: 20px;
-    padding-top: calc(20px + env(safe-area-inset-top));
-    padding-bottom: 100px; /* Space for fixed message bar */
+    padding: var(--space-5);
+    padding-top: calc(var(--space-5) + env(safe-area-inset-top));
     box-sizing: border-box;
 }
 
@@ -134,7 +140,7 @@ button {
     background: var(--color-primary);
     color: var(--color-bg-light);
     font-weight: var(--font-medium);
-    padding: 12px 20px;
+    padding: var(--space-3) var(--space-5);
     border-radius: var(--radius-md);
     width: 100%;
     text-align: center;
@@ -149,7 +155,7 @@ select {
     background: var(--color-bg);
     color: var(--color-text);
     border: 1px solid var(--color-border);
-    padding: 10px;
+    padding: var(--space-2);
     border-radius: var(--radius-sm);
     width: 100%;
     font-size: var(--text-base);
@@ -158,7 +164,7 @@ select {
 
 .label-dim {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
     color: var(--color-text-dim);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
@@ -171,7 +177,7 @@ select {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
-    padding: 10px 12px;
+    padding: var(--space-2) var(--space-3);
     width: 100%;
     box-sizing: border-box;
     font-family: inherit;
@@ -185,7 +191,7 @@ select {
 }
 
 .clickable-item {
-    padding: 12px;
+    padding: var(--space-3);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background 0.2s;
@@ -197,7 +203,7 @@ select {
 
 .badge {
     font-size: var(--text-xs);
-    padding: 2px 6px;
+    padding: var(--space-1) var(--space-2);
     border-radius: 4px;
     font-weight: var(--font-bold);
     text-transform: uppercase;
@@ -219,8 +225,8 @@ select {
     transform: translateX(-50%);
     width: 100%;
     max-width: 480px;
-    padding: 8px 20px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom) * 0.8);
+    padding: var(--space-2) var(--space-5);
+    padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom) * 0.8);
     background: var(--color-bg);
     border-top: 1px solid var(--color-border);
     z-index: 100;

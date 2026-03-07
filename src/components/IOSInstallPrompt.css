@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    padding: 1rem;
+    padding: var(--space-4);
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -23,7 +23,7 @@
 .ios-install-prompt {
     background-color: var(--color-bg-light);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: var(--space-6);
     max-width: 320px;
     width: 100%;
     position: relative;
@@ -43,13 +43,13 @@
 
 .ios-install-close {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: var(--space-3);
+    right: var(--space-3);
     background: transparent;
     border: none;
     color: var(--color-text-dim);
     cursor: pointer;
-    padding: 0.25rem;
+    padding: var(--space-1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -62,14 +62,14 @@
 }
 
 .ios-install-title {
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 var(--space-2) 0;
     font-size: var(--text-lg);
     font-weight: var(--font-bold);
     color: var(--color-text);
 }
 
 .ios-install-subtitle {
-    margin: 0 0 1.25rem 0;
+    margin: 0 0 var(--space-5) 0;
     font-size: var(--text-sm);
     color: var(--color-text-dim);
     line-height: 1.5;
@@ -78,14 +78,14 @@
 .ios-install-steps {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .ios-install-step {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
 }
 
 .ios-install-step-icon {
@@ -105,7 +105,7 @@
     color: var(--color-text);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
 }
 
 .ios-install-step-number {
@@ -124,7 +124,7 @@
 
 .ios-install-dismiss {
     width: 100%;
-    padding: 0.875rem 1rem;
+    padding: var(--space-4);
     background-color: var(--color-primary);
     color: var(--color-bg);
     border: none;
@@ -145,7 +145,7 @@
 
 .ios-install-arrow {
     position: fixed;
-    bottom: 1rem;
+    bottom: var(--space-4);
     left: 50%;
     transform: translateX(-50%);
     color: var(--color-primary);

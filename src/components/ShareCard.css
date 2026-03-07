@@ -1,7 +1,7 @@
 .share-card-container {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
 }
 
 .share-card-input-wrapper {
@@ -15,7 +15,7 @@
     background: var(--color-bg-light);
     border: 1px solid var(--color-border);
     color: var(--color-text);
-    padding-block: 0.75rem;
+    padding-block: var(--space-3);
     font-family: inherit;
     font-size: var(--text-base);
     border-radius: 22px;

@@ -1,17 +1,17 @@
 .train-list-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-2);
 }
 
 .train-list-error {
-    padding: 1.5rem;
+    padding: var(--space-6);
     text-align: center;
 }
 
 .train-list-error-message {
     color: var(--color-danger);
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
 }
 
 .train-list-error-button {
@@ -24,7 +24,7 @@
 }
 
 .train-card {
-    padding: 1rem;
+    padding: var(--space-4);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -46,14 +46,14 @@
 .train-card-times {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     flex: 2;
     min-width: 0;
 }
 
 .train-card-departure-time,
 .train-card-arrival-time {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: var(--font-bold);
     font-variant-numeric: tabular-nums;
 }
@@ -67,7 +67,7 @@
 }
 
 .train-card-time-cell.delayed .train-card-original-time {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: var(--font-bold);
     color: var(--color-text);
     font-variant-numeric: tabular-nums;
@@ -75,7 +75,7 @@
 
 .train-card-delayed-time {
     position: absolute;
-    top: calc(-1 * var(--space-2));
+    top: var(--space-neg-2);
     font-size: var(--text-xs);
     font-weight: var(--font-bold);
     color: var(--color-danger);
@@ -88,7 +88,7 @@
 .train-card-separator {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--space-2);
     flex: 1;
     min-width: 0;
 }
@@ -110,10 +110,10 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--space-1);
     flex: 1;
     justify-content: flex-end;
-    margin-left: 0.75rem;
+    margin-left: var(--space-3);
 }
 
 .train-card-dot {
@@ -121,7 +121,7 @@
     height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-right: 0.25rem;
+    margin-right: var(--space-1);
 }
 
 .train-card-dot.on-time {
@@ -168,7 +168,7 @@
     width: 50px;
     height: 24px;
     line-height: 24px;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
 }
 
 .skeleton-arrow {

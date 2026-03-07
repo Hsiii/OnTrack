@@ -28,7 +28,7 @@
 .skeleton-label {
     width: 80px;
     height: 16px;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
 }
 
 .skeleton-time {
@@ -43,7 +43,7 @@
 .skeleton-details {
     width: 120px;
     height: 16px;
-    margin-top: 0.25rem;
+    margin-top: var(--space-1);
 }
 
 .skeleton-badge {
