@@ -6,21 +6,13 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    scrollbar-gutter: stable;
-    padding-right: var(--space-1);
+    scrollbar-width: none;
 }
 
 .train-list-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.train-list-container::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.35);
-    border-radius: 999px;
-}
-
-.train-list-container::-webkit-scrollbar-track {
-    background: transparent;
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 .train-list-error {
