@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import './App.css';
 
-import { MapPin, MapPinOff, TrainFront } from 'lucide-react';
+import { TrainFront } from 'lucide-react';
 
 import { api } from './api/client';
 import { InitialLoadingScreen } from './components/InitialLoadingScreen';
@@ -22,6 +22,8 @@ function App() {
         setOriginId,
         destId,
         setDestId,
+        defaultDestId,
+        setDefaultDestId,
         autoDetectOrigin,
         setAutoDetectOrigin,
     } = usePersistence();
@@ -61,27 +63,6 @@ function App() {
                     <h1 className='app-header-title'>{t('app.title')}</h1>
                 </div>
                 <div className='app-header-actions'>
-                    <button
-                        type='button'
-                        className={`header-toggle-button ${autoDetectOrigin ? 'active' : ''}`}
-                        onClick={() => setAutoDetectOrigin(!autoDetectOrigin)}
-                        aria-label={
-                            autoDetectOrigin
-                                ? t('app.disableAutoDetectOrigin')
-                                : t('app.enableAutoDetectOrigin')
-                        }
-                        title={
-                            autoDetectOrigin
-                                ? t('app.disableAutoDetectOrigin')
-                                : t('app.enableAutoDetectOrigin')
-                        }
-                    >
-                        {autoDetectOrigin ? (
-                            <MapPin size={24} />
-                        ) : (
-                            <MapPinOff size={24} />
-                        )}
-                    </button>
                     <LanguageDropdown />
                 </div>
             </header>
@@ -98,6 +79,9 @@ function App() {
                             destId={destId}
                             setDestId={setDestId}
                             autoDetectOrigin={autoDetectOrigin}
+                            setAutoDetectOrigin={setAutoDetectOrigin}
+                            defaultDestId={defaultDestId}
+                            setDefaultDestId={setDefaultDestId}
                         />
                     </div>
 
@@ -115,12 +99,6 @@ function App() {
                         originName={originName}
                         destName={destName}
                     />
-
-                    {(!originId || !destId) && (
-                        <div className='app-placeholder'>
-                            {t('app.selectStationsPrompt')}
-                        </div>
-                    )}
                 </main>
             </div>
         </>

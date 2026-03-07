@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { MapPin, MapPinOff, Star } from 'lucide-react';
 
 import { useI18n } from '../i18n';
 import type { Station } from '../types';
@@ -15,6 +15,9 @@ interface StationSelectorProps {
     destId: string;
     setDestId: (id: string) => void;
     autoDetectOrigin: boolean;
+    setAutoDetectOrigin: (value: boolean) => void;
+    defaultDestId: string;
+    setDefaultDestId: (id: string) => void;
 }
 
 const CACHED_ORIGIN_KEY = 'ontrack_cached_origin';
@@ -26,17 +29,35 @@ export function StationSelector({
     destId,
     setDestId,
     autoDetectOrigin,
+    setAutoDetectOrigin,
+    defaultDestId,
+    setDefaultDestId,
 }: StationSelectorProps) {
     const { t } = useI18n();
     const [originSearch, setOriginSearch] = useState('');
     const [destSearch, setDestSearch] = useState('');
     const [originDropdownOpen, setOriginDropdownOpen] = useState(false);
     const [destDropdownOpen, setDestDropdownOpen] = useState(false);
+    const [toast, setToast] = useState<string | null>(null);
+    const toastTimer = useRef<ReturnType<typeof setTimeout>>();
     const hasAutoSelected = useRef(false);
     const isGeolocationPending = useRef(false);
+    const originIdRef = useRef(originId);
     const prevAutoDetectOrigin = useRef(autoDetectOrigin);
 
-    // Auto-select nearest station when autoDetectOrigin is enabled
+    const showToast = (message: string) => {
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+        setToast(message);
+        toastTimer.current = setTimeout(() => setToast(null), 2500);
+    };
+
+    useEffect(() => {
+        originIdRef.current = originId;
+    }, [originId]);
+
+    // Auto-select nearest station when autoDetectOrigin is enabled.
+    // This should only happen once on app start, or once each time the
+    // user toggles auto-detect from false to true.
     useEffect(() => {
         const wasAutoDetectOrigin = prevAutoDetectOrigin.current;
         const isToggledOn = !wasAutoDetectOrigin && autoDetectOrigin;
@@ -44,18 +65,16 @@ export function StationSelector({
 
         if (stations.length === 0) return;
 
-        // If auto-detect is disabled, use cached origin or first station (only on initial load)
+        // If auto-detect is disabled, use cached origin if available.
         if (!autoDetectOrigin) {
-            hasAutoSelected.current = false; // Reset so toggling back on will re-trigger geolocation
-            if (!originId) {
+            hasAutoSelected.current = false;
+            if (!originIdRef.current) {
                 const cachedOriginId = localStorage.getItem(CACHED_ORIGIN_KEY);
                 if (
                     cachedOriginId &&
                     stations.find((s) => s.id === cachedOriginId)
                 ) {
                     setOriginId(cachedOriginId);
-                } else if (stations[0]) {
-                    setOriginId(stations[0].id);
                 }
             }
             return;
@@ -65,8 +84,13 @@ export function StationSelector({
         if (hasAutoSelected.current || isGeolocationPending.current) return;
 
         if (!navigator.geolocation) {
-            // Fallback: select first station
-            if (stations[0]) setOriginId(stations[0].id);
+            const cachedOriginId = localStorage.getItem(CACHED_ORIGIN_KEY);
+            if (
+                cachedOriginId &&
+                stations.find((s) => s.id === cachedOriginId)
+            ) {
+                setOriginId(cachedOriginId);
+            }
             hasAutoSelected.current = true;
             return;
         }
@@ -79,8 +103,6 @@ export function StationSelector({
                 stations.find((s) => s.id === cachedOriginId)
             ) {
                 setOriginId(cachedOriginId);
-            } else if (stations[0]) {
-                setOriginId(stations[0].id);
             }
             hasAutoSelected.current = true;
         };
@@ -162,7 +184,7 @@ export function StationSelector({
             // Permissions API not supported — request directly
             requestGeolocation();
         }
-    }, [stations, setOriginId, autoDetectOrigin, originId]);
+    }, [stations, setOriginId, autoDetectOrigin]);
 
     const originStation = stations.find((s) => s.id === originId);
     const destStation = stations.find((s) => s.id === destId);
@@ -186,41 +208,104 @@ export function StationSelector({
         }
     };
 
+    const handleToggleGeo = () => {
+        const next = !autoDetectOrigin;
+        setAutoDetectOrigin(next);
+        showToast(next ? t('toast.geoEnabled') : t('toast.geoDisabled'));
+    };
+
+    const handleToggleDefaultDest = () => {
+        if (defaultDestId === destId) {
+            setDefaultDestId('');
+            showToast(t('toast.defaultDestCleared'));
+        } else {
+            setDefaultDestId(destId);
+            showToast(t('toast.defaultDestSet'));
+        }
+    };
+
+    const isDefaultDest = defaultDestId !== '' && defaultDestId === destId;
+
     return (
         <div className='station-selector-container'>
-            {/* Origin Station */}
-            <StationDropdown
-                stations={stations}
-                searchValue={originSearch}
-                setSearchValue={setOriginSearch}
-                isOpen={originDropdownOpen}
-                setIsOpen={handleOriginDropdownOpen}
-                selectedId={originId}
-                onSelect={handleOriginSelect}
-                placeholder={t('app.searchStation')}
-                selectedStation={originStation}
-                onCacheSelection={(id) =>
-                    localStorage.setItem(CACHED_ORIGIN_KEY, id)
-                }
-            />
-
-            {/* Arrow */}
-            <div className='station-arrow'>
-                <ArrowRight size={20} />
+            {/* Toast */}
+            <div
+                className={`station-toast ${toast ? 'station-toast-visible' : ''}`}
+            >
+                {toast}
             </div>
 
-            {/* Destination Station */}
-            <StationDropdown
-                stations={stations}
-                searchValue={destSearch}
-                setSearchValue={setDestSearch}
-                isOpen={destDropdownOpen}
-                setIsOpen={handleDestDropdownOpen}
-                selectedId={destId}
-                onSelect={setDestId}
-                placeholder={t('app.searchStation')}
-                selectedStation={destStation}
-            />
+            {/* Origin Station Row */}
+            <div className='station-row'>
+                <div className='station-field'>
+                    <StationDropdown
+                        stations={stations}
+                        searchValue={originSearch}
+                        setSearchValue={setOriginSearch}
+                        isOpen={originDropdownOpen}
+                        setIsOpen={handleOriginDropdownOpen}
+                        selectedId={originId}
+                        onSelect={handleOriginSelect}
+                        placeholder={t('station.origin')}
+                        title={t('station.selectOrigin')}
+                        selectedStation={originStation}
+                        onCacheSelection={(id) =>
+                            localStorage.setItem(CACHED_ORIGIN_KEY, id)
+                        }
+                    />
+                    <button
+                        type='button'
+                        className={`station-action-btn ${autoDetectOrigin ? 'active' : ''}`}
+                        onClick={handleToggleGeo}
+                        aria-label={
+                            autoDetectOrigin
+                                ? t('app.disableAutoDetectOrigin')
+                                : t('app.enableAutoDetectOrigin')
+                        }
+                    >
+                        {autoDetectOrigin ? (
+                            <MapPin size={24} />
+                        ) : (
+                            <MapPinOff size={24} />
+                        )}
+                    </button>
+                </div>
+            </div>
+
+            {/* Destination Station Row */}
+            <div className='station-row'>
+                <div className='station-field'>
+                    <StationDropdown
+                        stations={stations}
+                        searchValue={destSearch}
+                        setSearchValue={setDestSearch}
+                        isOpen={destDropdownOpen}
+                        setIsOpen={handleDestDropdownOpen}
+                        selectedId={destId}
+                        onSelect={setDestId}
+                        placeholder={t('station.destination')}
+                        title={t('station.selectDestination')}
+                        selectedStation={destStation}
+                    />
+                    {destId && (
+                        <button
+                            type='button'
+                            className={`station-action-btn station-action-btn-default ${isDefaultDest ? 'active' : ''}`}
+                            onClick={handleToggleDefaultDest}
+                            aria-label={
+                                isDefaultDest
+                                    ? t('toast.defaultDestCleared')
+                                    : t('toast.defaultDestSet')
+                            }
+                        >
+                            <Star
+                                size={24}
+                                fill={isDefaultDest ? 'currentColor' : 'none'}
+                            />
+                        </button>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

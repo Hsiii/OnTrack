@@ -1,19 +1,19 @@
 .app-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     color: var(--color-primary);
-    padding: 1rem 1.25rem;
-    margin: -20px -20px 1.5rem -20px;
+    padding: var(--space-4) var(--space-5);
+    margin: var(--space-neg-5) var(--space-neg-5) var(--space-4)
+        var(--space-neg-5);
     border-bottom: 1px solid var(--color-border);
 }
 
 .app-header-left {
     display: flex;
     align-items: center;
-    gap: 0.25cap;
+    gap: var(--space-1);
     flex: 1;
-    font-family: var(--font-sans);
     font-size: var(--text-lg);
 }
 
@@ -25,8 +25,8 @@
 
 .app-header-title {
     margin: 0;
-    font-family: inherit;
-    font-size: inherit;
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
     font-weight: var(--font-bold);
     letter-spacing: 0.02em;
     line-height: 1.2;
@@ -36,54 +36,7 @@
 .app-header-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-}
-
-.header-toggle-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 10px;
-    border-radius: 50%;
-    background: var(--color-bg-light);
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease,
-        transform 0.1s ease;
-}
-
-.header-toggle-button:hover {
-    background: var(--color-border);
-}
-
-.header-toggle-button.active {
-    color: var(--color-primary);
-    background: color-mix(
-        in srgb,
-        var(--color-primary) 10%,
-        var(--color-bg-light)
-    );
-    border-color: color-mix(in srgb, var(--color-primary) 42%, transparent);
-}
-
-.header-toggle-button:active {
-    transform: scale(0.95);
-}
-
-.header-toggle-button:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
-.header-toggle-button svg {
-    width: 24px;
-    height: 24px;
+    gap: var(--space-2);
 }
 
 .app-container {
@@ -93,13 +46,5 @@
 .app-main {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-}
-
-.app-placeholder {
-    text-align: center;
-    opacity: 0.5;
-    margin-top: 2rem;
-    line-height: 1.5;
-    min-height: 3rem;
+    gap: var(--space-4);
 }
