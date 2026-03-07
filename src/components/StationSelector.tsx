@@ -39,7 +39,7 @@ export function StationSelector({
     const [originDropdownOpen, setOriginDropdownOpen] = useState(false);
     const [destDropdownOpen, setDestDropdownOpen] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
-    const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+    const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
     const hasAutoSelected = useRef(false);
     const isGeolocationPending = useRef(false);
     const originIdRef = useRef(originId);
