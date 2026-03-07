@@ -1,23 +1,46 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import twFlag from 'flag-icons/flags/4x3/tw.svg';
 import usFlag from 'flag-icons/flags/4x3/us.svg';
-import { Globe } from 'lucide-react';
+import { Check, Globe } from 'lucide-react';
 
 import { useI18n } from '../i18n';
+import type { LanguageCode } from '../i18n';
 
 import './LanguageDropdown.css';
+
+const DISMISS_THRESHOLD = 60;
+
+const options: {
+    value: LanguageCode;
+    flag: string;
+    labelKey: 'language.zhTW' | 'language.en';
+}[] = [
+    { value: 'zh-TW', flag: twFlag, labelKey: 'language.zhTW' },
+    { value: 'en', flag: usFlag, labelKey: 'language.en' },
+];
 
 export function LanguageDropdown() {
     const { language, setLanguage, t } = useI18n();
     const [isOpen, setIsOpen] = useState(false);
+    const [dragY, setDragY] = useState(0);
+    const [dismissing, setDismissing] = useState(false);
+    const touchStartY = useRef(0);
+    const sheetRef = useRef<HTMLDivElement>(null);
+
+    const dismiss = useCallback(() => {
+        setDismissing(true);
+        setTimeout(() => {
+            setIsOpen(false);
+            setDismissing(false);
+            setDragY(0);
+        }, 180);
+    }, []);
 
     useEffect(() => {
         if (!isOpen) return;
 
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setIsOpen(false);
-            }
+            if (event.key === 'Escape') dismiss();
         };
 
         document.addEventListener('keydown', handleKeyDown);
@@ -25,11 +48,28 @@ export function LanguageDropdown() {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [isOpen]);
+    }, [isOpen, dismiss]);
 
-    const handleLanguageSelect = (nextLanguage: 'zh-TW' | 'en') => {
-        setLanguage(nextLanguage);
-        setIsOpen(false);
+    const handleSelect = (next: LanguageCode) => {
+        setLanguage(next);
+        dismiss();
+    };
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        touchStartY.current = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        const dy = e.touches[0].clientY - touchStartY.current;
+        setDragY(Math.max(0, dy));
+    };
+
+    const onTouchEnd = () => {
+        if (dragY > DISMISS_THRESHOLD) {
+            dismiss();
+        } else {
+            setDragY(0);
+        }
     };
 
     return (
@@ -46,60 +86,56 @@ export function LanguageDropdown() {
 
             {isOpen && (
                 <div
-                    className='language-dialog-backdrop'
-                    onClick={() => setIsOpen(false)}
+                    className={`lang-sheet-backdrop ${dismissing ? 'dismissing' : ''}`}
+                    onClick={dismiss}
                 >
                     <div
-                        className='language-dialog card-panel'
+                        ref={sheetRef}
+                        className={`lang-sheet ${dismissing ? 'dismissing' : ''}`}
                         role='dialog'
                         aria-modal='true'
-                        aria-labelledby='language-dialog-title'
-                        onClick={(event) => event.stopPropagation()}
+                        aria-labelledby='lang-sheet-title'
+                        style={
+                            dragY > 0
+                                ? {
+                                      transform: `translateY(${dragY}px)`,
+                                      transition: 'none',
+                                  }
+                                : undefined
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
                     >
-                        <h2
-                            id='language-dialog-title'
-                            className='language-dialog-title'
-                        >
+                        <div className='lang-sheet-handle' />
+                        <h2 id='lang-sheet-title' className='lang-sheet-title'>
                             {t('language.selectTitle')}
                         </h2>
-
-                        <div className='language-dialog-options'>
+                        {options.map((opt) => (
                             <button
+                                key={opt.value}
                                 type='button'
-                                className={`language-option ${language === 'zh-TW' ? 'active' : ''}`}
-                                onClick={() => handleLanguageSelect('zh-TW')}
+                                className={`lang-sheet-option ${language === opt.value ? 'active' : ''}`}
+                                onClick={() => handleSelect(opt.value)}
                             >
-                                <span className='language-option-flag-shell'>
-                                    <img
-                                        className='language-option-flag'
-                                        src={twFlag}
-                                        alt=''
-                                        aria-hidden='true'
+                                <img
+                                    className='lang-option-flag'
+                                    src={opt.flag}
+                                    alt=''
+                                    aria-hidden='true'
+                                />
+                                <span className='lang-option-label'>
+                                    {t(opt.labelKey)}
+                                </span>
+                                {language === opt.value && (
+                                    <Check
+                                        className='lang-option-check'
+                                        aria-hidden
                                     />
-                                </span>
-                                <span className='language-option-text'>
-                                    {t('language.zhTW')}
-                                </span>
+                                )}
                             </button>
-
-                            <button
-                                type='button'
-                                className={`language-option ${language === 'en' ? 'active' : ''}`}
-                                onClick={() => handleLanguageSelect('en')}
-                            >
-                                <span className='language-option-flag-shell'>
-                                    <img
-                                        className='language-option-flag'
-                                        src={usFlag}
-                                        alt=''
-                                        aria-hidden='true'
-                                    />
-                                </span>
-                                <span className='language-option-text'>
-                                    {t('language.en')}
-                                </span>
-                            </button>
-                        </div>
+                        ))}
                     </div>
                 </div>
             )}

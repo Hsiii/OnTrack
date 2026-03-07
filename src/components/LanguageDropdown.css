@@ -1,3 +1,5 @@
+/* ── Trigger ── */
+
 .language-dropdown-trigger {
     display: flex;
     align-items: center;
@@ -6,20 +8,15 @@
     height: 44px;
     padding: var(--space-2);
     border-radius: 50%;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-light);
-    color: var(--color-text);
+    border: none;
+    background: none;
+    color: var(--color-text-dim);
     cursor: pointer;
     line-height: 1;
-    transition:
-        transform 0.1s ease,
-        border-color 0.2s ease,
-        background 0.2s ease,
-        color 0.2s ease;
 }
 
 .language-dropdown-trigger:hover {
-    background: var(--color-border);
+    color: var(--color-text);
 }
 
 .language-dropdown-trigger:focus-visible {
@@ -36,90 +33,117 @@
     height: 24px;
 }
 
-.language-dialog-backdrop {
+/* ── Bottom-sheet backdrop ── */
+
+.lang-sheet-backdrop {
     position: fixed;
     inset: 0;
     z-index: 1200;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    padding: var(--space-5);
-    background: rgba(15, 23, 42, 0.72);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.45);
+    animation: lang-backdrop-in 0.18s ease-out;
+    transition: opacity 0.18s ease-out;
 }
 
-.language-dialog {
-    width: min(100%, 320px);
-    padding: var(--space-5);
+.lang-sheet-backdrop.dismissing {
+    opacity: 0;
+    animation: none;
 }
 
-.language-dialog-title {
-    margin: 0 0 var(--space-5);
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    text-align: center;
+@keyframes lang-backdrop-in {
+    from {
+        opacity: 0;
+    }
 }
 
-.language-dialog-options {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-}
+/* ── Sheet ── */
 
-.language-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-2);
-    border-radius: var(--radius-md);
-    border: 1px solid transparent;
-    color: var(--color-text);
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.1s ease;
-}
-
-.language-option:hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.language-option:active {
-    transform: scale(0.98);
-}
-
-.language-option.active {
-    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-    border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
-}
-
-.language-option-flag-shell {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 68px;
-    height: 68px;
-    border-radius: 999px;
+.lang-sheet {
+    width: 100%;
+    max-width: 480px;
     background: var(--color-bg-light);
-    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--space-2) 0 calc(var(--space-4) + env(safe-area-inset-bottom));
+    animation: lang-sheet-in 0.22s ease-out;
+    transition: transform 0.18s ease-out;
+    touch-action: none;
 }
 
-.language-option-flag {
-    width: 42px;
-    height: 42px;
-    border-radius: 999px;
-    object-fit: cover;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
+.lang-sheet.dismissing {
+    transform: translateY(100%);
+    animation: none;
 }
 
-.language-option-text {
+@keyframes lang-sheet-in {
+    from {
+        transform: translateY(100%);
+    }
+}
+
+/* ── Handle ── */
+
+.lang-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    margin: var(--space-2) auto var(--space-2);
+}
+
+/* ── Title ── */
+
+.lang-sheet-title {
+    margin: 0 0 var(--space-2);
+    padding: 0 var(--space-5);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     color: var(--color-text-dim);
-    text-align: center;
 }
 
-.language-option.active .language-option-text {
+/* ── Option row ── */
+
+.lang-sheet-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3) var(--space-5);
+    color: var(--color-text-dim);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    text-align: left;
+}
+
+.lang-sheet-option:active {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.lang-sheet-option.active {
     color: var(--color-text);
+}
+
+/* ── Flag ── */
+
+.lang-option-flag {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* ── Label ── */
+
+.lang-option-label {
+    flex: 1;
+}
+
+/* ── Checkmark ── */
+
+.lang-option-check {
+    color: var(--color-text);
+    flex-shrink: 0;
 }
