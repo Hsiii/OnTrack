@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Share2 } from 'lucide-react';
 
 import { useI18n } from '../i18n';
@@ -15,6 +15,10 @@ interface ShareCardProps {
 
 export function ShareCard({ train, destName }: ShareCardProps) {
     const { t } = useI18n();
+    const inputRef = useRef<HTMLInputElement>(null);
+    const inputWrapperRef = useRef<HTMLDivElement>(null);
+    const timePartRef = useRef<HTMLSpanElement>(null);
+    const stationPartRef = useRef<HTMLSpanElement>(null);
     // Calculate adjusted arrival time (with delay)
     const adjustedTime = useMemo(() => {
         if (!train) return '';
@@ -35,18 +39,104 @@ export function ShareCard({ train, destName }: ShareCardProps) {
           })
         : t('share.noTrainMessage');
 
-    const [message, setMessage] = useState(defaultMessage);
+    const prevTimeRef = useRef(adjustedTime);
+    const prevStationRef = useRef(destName);
+    const flashTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const syncTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-    // Reset message when defaultMessage changes (train selection or delay update)
+    // Split default message into typed parts for overlay rendering
+    const overlayParts = useMemo(() => {
+        if (!train) return null;
+        type Part = { text: string; type: 'text' | 'time' | 'station' };
+        const parts: Part[] = [];
+        const markers: {
+            idx: number;
+            len: number;
+            type: 'time' | 'station';
+        }[] = [];
+        if (adjustedTime) {
+            const idx = defaultMessage.indexOf(adjustedTime);
+            if (idx >= 0)
+                markers.push({ idx, len: adjustedTime.length, type: 'time' });
+        }
+        if (destName) {
+            const idx = defaultMessage.indexOf(destName);
+            if (idx >= 0)
+                markers.push({ idx, len: destName.length, type: 'station' });
+        }
+        markers.sort((a, b) => a.idx - b.idx);
+        let pos = 0;
+        for (const m of markers) {
+            if (m.idx > pos)
+                parts.push({
+                    text: defaultMessage.slice(pos, m.idx),
+                    type: 'text',
+                });
+            parts.push({
+                text: defaultMessage.slice(m.idx, m.idx + m.len),
+                type: m.type,
+            });
+            pos = m.idx + m.len;
+        }
+        if (pos < defaultMessage.length)
+            parts.push({ text: defaultMessage.slice(pos), type: 'text' });
+        return parts;
+    }, [train, defaultMessage, adjustedTime, destName]);
+
+    // Reset message and trigger per-part flash when data changes
     useEffect(() => {
-        setMessage(defaultMessage);
-    }, [defaultMessage]);
+        if (inputRef.current) {
+            inputRef.current.value = defaultMessage;
+        }
+
+        const inputWrapper = inputWrapperRef.current;
+
+        const timeChanged = prevTimeRef.current !== adjustedTime;
+        const stationChanged = prevStationRef.current !== destName;
+        prevTimeRef.current = adjustedTime;
+        prevStationRef.current = destName;
+
+        if (!inputWrapper || (!timeChanged && !stationChanged)) return;
+
+        clearTimeout(flashTimerRef.current);
+        clearTimeout(syncTimerRef.current);
+        inputWrapper.classList.add('is-flashing');
+
+        if (timeChanged) {
+            timePartRef.current?.classList.add('sync-flash');
+        }
+
+        if (stationChanged) {
+            stationPartRef.current?.classList.add('sync-flash');
+        }
+
+        // Remove syncing class after brief delay to trigger fade transition
+        syncTimerRef.current = setTimeout(() => {
+            timePartRef.current?.classList.remove('sync-flash');
+            stationPartRef.current?.classList.remove('sync-flash');
+        }, 50);
+
+        // Hide overlay after full animation completes
+        flashTimerRef.current = setTimeout(() => {
+            inputWrapper.classList.remove('is-flashing');
+        }, 500);
+    }, [defaultMessage, adjustedTime, destName]);
+
+    useEffect(
+        () => () => {
+            clearTimeout(flashTimerRef.current);
+            clearTimeout(syncTimerRef.current);
+        },
+        []
+    );
 
     const handleShare = async () => {
+        const shareMessage = inputRef.current?.value ?? defaultMessage;
+
         if (navigator.share) {
             try {
                 await navigator.share({
-                    text: message,
+                    text: shareMessage,
                 });
             } catch (err) {
                 console.log('Share canceled', err);
@@ -54,7 +144,7 @@ export function ShareCard({ train, destName }: ShareCardProps) {
         } else {
             // Fallback: Copy to clipboard
             try {
-                await navigator.clipboard.writeText(message);
+                await navigator.clipboard.writeText(shareMessage);
             } catch (err) {
                 console.error('Copy failed', err);
             }
@@ -63,12 +153,33 @@ export function ShareCard({ train, destName }: ShareCardProps) {
 
     return (
         <div className='message-bar-fixed share-card-container'>
-            <input
-                type='text'
-                className='share-card-input'
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-            />
+            <div ref={inputWrapperRef} className='share-card-input-wrapper'>
+                <input
+                    ref={inputRef}
+                    type='text'
+                    className='share-card-input'
+                    defaultValue={defaultMessage}
+                />
+                {overlayParts && (
+                    <div className='share-card-overlay' aria-hidden='true'>
+                        {overlayParts.map((part, i) => (
+                            <span
+                                key={i}
+                                className={`share-card-part share-card-part-${part.type}`}
+                                ref={
+                                    part.type === 'time'
+                                        ? timePartRef
+                                        : part.type === 'station'
+                                          ? stationPartRef
+                                          : undefined
+                                }
+                            >
+                                {part.text}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             <IconButton
                 onClick={handleShare}
