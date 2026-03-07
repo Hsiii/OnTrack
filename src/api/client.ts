@@ -7,6 +7,23 @@ const inflightRequests = new Map<string, Promise<unknown>>();
 let stationsCache: { data: Station[]; expires: number } | null = null;
 const STATIONS_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
+interface GetStationsOptions {
+    bypassCache?: boolean;
+    minDelayMs?: number;
+    forceError?: boolean;
+    holdForever?: boolean;
+}
+
+interface GetScheduleOptions {
+    minDelayMs?: number;
+    forceError?: boolean;
+    holdForever?: boolean;
+}
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function fetchJson<T>(url: string, retryCount = 0): Promise<T> {
     // Check if there's already an in-flight request for this URL
     const cacheKey = `${url}-${retryCount}`;
@@ -49,23 +66,100 @@ async function fetchJson<T>(url: string, retryCount = 0): Promise<T> {
 }
 
 export const api = {
-    getStations: async (): Promise<Station[]> => {
+    getStations: async (
+        options: GetStationsOptions = {}
+    ): Promise<Station[]> => {
+        const {
+            bypassCache = false,
+            minDelayMs = 0,
+            forceError = false,
+            holdForever = false,
+        } = options;
         const now = Date.now();
+
+        if (forceError) {
+            if (minDelayMs > 0) {
+                await sleep(minDelayMs);
+            }
+
+            throw new Error('Debug station fetch failure');
+        }
+
+        if (holdForever) {
+            return new Promise<Station[]>(() => {
+                // Intentionally unresolved for debug-only loading state testing.
+            });
+        }
+
         // Return cached data if still valid
-        if (stationsCache && stationsCache.expires > now) {
+        if (!bypassCache && stationsCache && stationsCache.expires > now) {
             return stationsCache.data;
         }
+
+        const params = new URLSearchParams();
+        if (bypassCache) {
+            params.set('_nocache', String(Date.now()));
+        }
+
+        const requestUrl = params.size
+            ? `/api/stations?${params.toString()}`
+            : '/api/stations';
+
+        const startedAt = Date.now();
         // Fetch fresh data
-        const data = await fetchJson<Station[]>('/api/stations');
+        const data = await fetchJson<Station[]>(requestUrl);
+
+        if (minDelayMs > 0) {
+            const elapsed = Date.now() - startedAt;
+            if (elapsed < minDelayMs) {
+                await sleep(minDelayMs - elapsed);
+            }
+        }
+
         stationsCache = { data, expires: now + STATIONS_CACHE_TTL };
         return data;
     },
 
-    getSchedule: (origin: string, dest: string, date?: string) => {
+    getSchedule: async (
+        origin: string,
+        dest: string,
+        date?: string,
+        options: GetScheduleOptions = {}
+    ) => {
+        const {
+            minDelayMs = 0,
+            forceError = false,
+            holdForever = false,
+        } = options;
         const params = new URLSearchParams({ origin, dest });
         if (date) params.append('date', date);
-        return fetchJson<ScheduleResponse>(
+
+        if (forceError) {
+            if (minDelayMs > 0) {
+                await sleep(minDelayMs);
+            }
+
+            throw new Error('Debug schedule fetch failure');
+        }
+
+        if (holdForever) {
+            return new Promise<ScheduleResponse>(() => {
+                // Intentionally unresolved for debug-only loading state testing.
+            });
+        }
+
+        const startedAt = Date.now();
+        const data = await fetchJson<ScheduleResponse>(
             `/api/schedule?${params.toString()}`
         );
+
+        if (minDelayMs > 0) {
+            const elapsed = Date.now() - startedAt;
+            if (elapsed < minDelayMs) {
+                await sleep(minDelayMs - elapsed);
+            }
+        }
+
+        return data;
     },
 };

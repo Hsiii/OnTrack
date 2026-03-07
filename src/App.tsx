@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import './App.css';
 
@@ -12,6 +12,7 @@ import {
     StationSelector,
     StationSelectorSkeleton,
     TrainList,
+    TrainListSkeleton,
 } from './components';
 import { usePersistence } from './hooks/usePersistence';
 import { useI18n } from './i18n';
@@ -19,6 +20,24 @@ import type { Station, TrainInfo } from './types';
 
 function formatEnglishStationName(name?: string) {
     return name?.replace(/_/g, ' ');
+}
+
+const STATION_DEBUG_MIN_DELAY_MS = 900;
+
+function getStationDebugFlags() {
+    if (!import.meta.env.DEV || typeof window === 'undefined') {
+        return {
+            showSkeleton: false,
+            showFetchError: false,
+        };
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    return {
+        showSkeleton: params.get('routeLoad') === '1',
+        showFetchError: params.get('routeError') === '1',
+    };
 }
 
 function App() {
@@ -38,13 +57,35 @@ function App() {
     const [selectedTrain, setSelectedTrain] = useState<TrainInfo | null>(null);
     const [stationsLoading, setStationsLoading] = useState(true);
 
+    const stationDebugFlags = useMemo(() => getStationDebugFlags(), []);
+
+    const fetchStations = useCallback(() => {
+        api.getStations({
+            bypassCache:
+                stationDebugFlags.showSkeleton ||
+                stationDebugFlags.showFetchError,
+            minDelayMs:
+                !stationDebugFlags.showSkeleton &&
+                stationDebugFlags.showFetchError
+                    ? STATION_DEBUG_MIN_DELAY_MS
+                    : 0,
+            forceError: stationDebugFlags.showFetchError,
+            holdForever:
+                stationDebugFlags.showSkeleton &&
+                !stationDebugFlags.showFetchError,
+        })
+            .then(setStations)
+            .catch((error) => {
+                console.error(error);
+                setStations([]);
+            })
+            .finally(() => setStationsLoading(false));
+    }, [stationDebugFlags.showFetchError, stationDebugFlags.showSkeleton]);
+
     // Fetch stations at App level to provide names to ShareCard
     useEffect(() => {
-        api.getStations()
-            .then(setStations)
-            .catch(console.error)
-            .finally(() => setStationsLoading(false));
-    }, []);
+        void fetchStations();
+    }, [fetchStations]);
 
     const stationMap = useMemo(
         () =>
@@ -104,6 +145,15 @@ function App() {
                             />
                         )}
                     </div>
+
+                    {stationsLoading && stationDebugFlags.showSkeleton ? (
+                        <div>
+                            <span className='label-dim'>
+                                {t('app.selectTrain')}
+                            </span>
+                            <TrainListSkeleton showLabel={false} />
+                        </div>
+                    ) : null}
 
                     {!stationsLoading && originId && destId && (
                         <TrainList
