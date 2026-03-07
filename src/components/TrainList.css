@@ -55,6 +55,7 @@
 .train-card-arrival-time {
     font-size: var(--text-lg);
     font-weight: var(--font-bold);
+    font-variant-numeric: tabular-nums;
 }
 
 .train-card-time-cell {
@@ -69,6 +70,7 @@
     font-size: var(--text-lg);
     font-weight: var(--font-bold);
     color: var(--color-text);
+    font-variant-numeric: tabular-nums;
 }
 
 .train-card-delayed-time {
@@ -80,6 +82,7 @@
     line-height: 1;
     letter-spacing: 0.02em;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .train-card-separator {
