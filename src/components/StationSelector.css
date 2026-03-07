@@ -74,6 +74,12 @@
     color: var(--color-text);
 }
 
+.station-action-btn:not(.station-action-btn-default),
+.station-action-btn:not(.station-action-btn-default):hover,
+.station-action-btn:not(.station-action-btn-default).active {
+    color: var(--color-text);
+}
+
 .station-action-btn-default,
 .station-action-btn-default:hover,
 .station-action-btn-default.active {
