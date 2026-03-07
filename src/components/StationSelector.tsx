@@ -13,7 +13,6 @@ interface StationSelectorProps {
     setOriginId: (id: string) => void;
     destId: string;
     setDestId: (id: string) => void;
-    defaultDestId?: string;
     autoDetectOrigin: boolean;
 }
 
@@ -25,7 +24,6 @@ export function StationSelector({
     setOriginId,
     destId,
     setDestId,
-    defaultDestId,
     autoDetectOrigin,
 }: StationSelectorProps) {
     const { t } = useI18n();
@@ -35,7 +33,6 @@ export function StationSelector({
     const [destDropdownOpen, setDestDropdownOpen] = useState(false);
     const hasAutoSelected = useRef(false);
     const isGeolocationPending = useRef(false);
-    const hasAutoFilledDest = useRef(false);
     const prevAutoDetectOrigin = useRef(autoDetectOrigin);
 
     // Auto-select nearest station when autoDetectOrigin is enabled
@@ -160,23 +157,6 @@ export function StationSelector({
             requestGeolocation();
         }
     }, [stations, setOriginId, autoDetectOrigin, originId]);
-
-    // Auto-fill destination with default destination (takes priority over cache)
-    useEffect(() => {
-        if (
-            stations.length === 0 ||
-            hasAutoFilledDest.current ||
-            !defaultDestId
-        )
-            return;
-
-        hasAutoFilledDest.current = true;
-
-        // Default destination takes priority - always set it if valid
-        if (stations.find((s) => s.id === defaultDestId)) {
-            setDestId(defaultDestId);
-        }
-    }, [stations, defaultDestId, destId, setDestId]);
 
     const originStation = stations.find((s) => s.id === originId);
     const destStation = stations.find((s) => s.id === destId);

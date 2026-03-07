@@ -176,18 +176,6 @@ export function TrainList({
             </div>
         );
 
-    // Compute current time and next train index once (outside the map loop)
-    const now = new Date();
-    const currentTimeStr = now.toLocaleTimeString('en-CA', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'Asia/Taipei',
-    });
-    const nextTrainNo = trains.find(
-        (t) => t.departureTime >= currentTimeStr
-    )?.trainNo;
-
     return (
         <div>
             <span className='label-dim'>{t('app.selectTrain')}</span>
@@ -221,7 +209,6 @@ export function TrainList({
                     // Render actual train data
                     const trainData = train as TrainInfo;
                     const isSelected = trainData.trainNo === selectedTrainNo;
-                    const isNext = trainData.trainNo === nextTrainNo;
 
                     return (
                         <div
@@ -238,14 +225,6 @@ export function TrainList({
                                     <span className='train-card-arrival-time'>
                                         {trainData.arrivalTime}
                                     </span>
-                                    {isNext && (
-                                        <Badge
-                                            variant='success'
-                                            className='train-card-next-badge'
-                                        >
-                                            {t('train.next')}
-                                        </Badge>
-                                    )}
                                 </div>
                                 <div className='train-card-details'>
                                     {parseTrainType(trainData.trainType)}{' '}

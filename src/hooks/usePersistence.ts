@@ -5,7 +5,6 @@ const STORAGE_KEYS = {
     DEST: 'ontrack_dest',
     TEMPLATE: 'ontrack_template',
     AUTO_DETECT_ORIGIN: 'ontrack_auto_detect_origin',
-    DEFAULT_DEST: 'ontrack_default_dest',
 };
 
 const DEFAULT_TEMPLATE = '{adjusted_time}到{dest}';
@@ -34,9 +33,6 @@ export function usePersistence() {
     const [autoDetectOrigin, setAutoDetectOrigin] = useState<boolean>(
         () => localStorage.getItem(STORAGE_KEYS.AUTO_DETECT_ORIGIN) === 'true'
     );
-    const [defaultDestId, setDefaultDestId] = useState<string>(() =>
-        getValidatedStationId(STORAGE_KEYS.DEFAULT_DEST)
-    );
 
     const saveOrigin = (id: string) => {
         if (!isValidStationId(id)) return;
@@ -60,12 +56,6 @@ export function usePersistence() {
         localStorage.setItem(STORAGE_KEYS.AUTO_DETECT_ORIGIN, String(value));
     };
 
-    const saveDefaultDest = (id: string) => {
-        if (!isValidStationId(id)) return;
-        setDefaultDestId(id);
-        localStorage.setItem(STORAGE_KEYS.DEFAULT_DEST, id);
-    };
-
     return {
         originId,
         setOriginId: saveOrigin,
@@ -76,7 +66,5 @@ export function usePersistence() {
         resetTemplate: () => saveTemplate(DEFAULT_TEMPLATE),
         autoDetectOrigin,
         setAutoDetectOrigin: saveAutoDetectOrigin,
-        defaultDestId,
-        setDefaultDestId: saveDefaultDest,
     };
 }

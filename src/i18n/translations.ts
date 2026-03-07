@@ -12,12 +12,16 @@ export const translations = {
         'app.selectTrain': '選擇班次',
         'app.searchStation': '搜尋車站',
         'app.selectStationsPrompt': '選擇出發及到達車站以查詢時刻表',
-        'app.settingsAriaLabel': '設定',
         'app.switchToEnglish': '切換成英文',
         'app.switchToChinese': '切換成中文',
+        'app.enableAutoDetectOrigin': '開啟定位起點',
+        'app.disableAutoDetectOrigin': '關閉定位起點',
+        'language.openDialog': '開啟語言選單',
+        'language.selectTitle': '選擇語言',
+        'language.zhTW': '繁體中文',
+        'language.en': 'English',
 
         'train.onTime': 'On Time',
-        'train.next': 'Next',
         'train.delayMinutes': '+{minutes} min',
         'train.noTrainsAvailable': '查無可搭乘班次',
 
@@ -27,10 +31,6 @@ export const translations = {
         'share.arrivalMessage': '{time}到{station}',
         'share.noTrainMessage': '好像沒車搭了',
         'share.lineIconAlt': 'Line',
-
-        'settings.autoDetectOrigin': '自動偵測起點站',
-        'settings.defaultDestination': '設定預設目的地',
-        'settings.selectStation': '選擇車站',
 
         'iosInstall.title': '加到主畫面',
         'iosInstall.subtitle': '將 {appName} 加入主畫面以享受最佳使用體驗',
@@ -45,12 +45,16 @@ export const translations = {
         'app.searchStation': 'Search station',
         'app.selectStationsPrompt':
             'Select origin and destination stations to view schedules',
-        'app.settingsAriaLabel': 'Settings',
         'app.switchToEnglish': 'Switch to English',
         'app.switchToChinese': 'Switch to Chinese',
+        'app.enableAutoDetectOrigin': 'Enable origin auto-detect',
+        'app.disableAutoDetectOrigin': 'Disable origin auto-detect',
+        'language.openDialog': 'Open language menu',
+        'language.selectTitle': 'Select language',
+        'language.zhTW': 'Traditional Chinese',
+        'language.en': 'English',
 
         'train.onTime': 'On Time',
-        'train.next': 'Next',
         'train.delayMinutes': '+{minutes} min',
         'train.noTrainsAvailable': 'No trains available',
 
@@ -60,10 +64,6 @@ export const translations = {
         'share.arrivalMessage': 'Arrive at {station} by {time}',
         'share.noTrainMessage': 'No more trains available',
         'share.lineIconAlt': 'Line',
-
-        'settings.autoDetectOrigin': 'Auto-detect origin',
-        'settings.defaultDestination': 'Default destination',
-        'settings.selectStation': 'Select station',
 
         'iosInstall.title': 'Add to Home Screen',
         'iosInstall.subtitle':

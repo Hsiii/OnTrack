@@ -6,6 +6,5 @@ export { IconButton } from './IconButton';
 export { InitialLoadingScreen } from './InitialLoadingScreen';
 export { IOSInstallPrompt } from './IOSInstallPrompt';
 export { LoadingSpinner } from './LoadingSpinner';
-export { Settings } from './Settings';
 export { StationDropdown } from './StationDropdown';
 export { TrainListSkeleton } from './TrainListSkeleton';

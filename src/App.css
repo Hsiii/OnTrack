@@ -35,51 +35,55 @@
     gap: 0.5rem;
 }
 
-.settings-button {
+.header-toggle-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    border: none;
-    color: var(--color-text-dim);
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border-radius: 50%;
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
     cursor: pointer;
     transition:
-        color 0.2s,
-        transform 0.2s;
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.1s ease;
 }
 
-.settings-button.active {
+.header-toggle-button:hover {
+    background: var(--color-border);
+}
+
+.header-toggle-button.active {
     color: var(--color-primary);
+    background: color-mix(
+        in srgb,
+        var(--color-primary) 10%,
+        var(--color-bg-light)
+    );
+    border-color: color-mix(in srgb, var(--color-primary) 42%, transparent);
 }
 
-.settings-button svg {
-    transition: transform 0.3s ease;
+.header-toggle-button:active {
+    transform: scale(0.95);
 }
 
-.settings-button.active svg {
-    transform: rotate(-90deg);
+.header-toggle-button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.header-toggle-button svg {
+    width: 24px;
+    height: 24px;
 }
 
 .app-container {
     width: 100%;
-}
-
-.app-settings-panel {
-    max-height: 0;
-    opacity: 0;
-    transition:
-        max-height 0.15s ease,
-        opacity 0.3s ease;
-}
-
-.app-settings-panel.open {
-    max-height: 300px;
-    opacity: 1;
-    transition:
-        max-height 0.3s ease,
-        opacity 0.3s ease;
 }
 
 .app-main {

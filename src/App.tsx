@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react';
 
 import './App.css';
 
-import { Settings as SettingsIcon, TrainFront } from 'lucide-react';
+import { MapPin, MapPinOff, TrainFront } from 'lucide-react';
 
 import { api } from './api/client';
 import { InitialLoadingScreen } from './components/InitialLoadingScreen';
 import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 import { LanguageDropdown } from './components/LanguageDropdown';
-import { Settings } from './components/Settings';
 import { ShareCard } from './components/ShareCard';
 import { StationSelector } from './components/StationSelector';
 import { TrainList } from './components/TrainList';
@@ -25,14 +24,11 @@ function App() {
         setDestId,
         autoDetectOrigin,
         setAutoDetectOrigin,
-        defaultDestId,
-        setDefaultDestId,
     } = usePersistence();
 
     const [stations, setStations] = useState<Station[]>([]);
     const [selectedTrain, setSelectedTrain] = useState<TrainInfo | null>(null);
     const [stationsLoaded, setStationsLoaded] = useState(false);
-    const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Fetch stations at App level to provide names to ShareCard
     useEffect(() => {
@@ -65,29 +61,31 @@ function App() {
                     <h1 className='app-header-title'>{t('app.title')}</h1>
                 </div>
                 <div className='app-header-actions'>
-                    <LanguageDropdown />
                     <button
-                        className={`settings-button ${settingsOpen ? 'active' : ''}`}
-                        onClick={() => setSettingsOpen(!settingsOpen)}
-                        aria-label={t('app.settingsAriaLabel')}
+                        type='button'
+                        className={`header-toggle-button ${autoDetectOrigin ? 'active' : ''}`}
+                        onClick={() => setAutoDetectOrigin(!autoDetectOrigin)}
+                        aria-label={
+                            autoDetectOrigin
+                                ? t('app.disableAutoDetectOrigin')
+                                : t('app.enableAutoDetectOrigin')
+                        }
+                        title={
+                            autoDetectOrigin
+                                ? t('app.disableAutoDetectOrigin')
+                                : t('app.enableAutoDetectOrigin')
+                        }
                     >
-                        <SettingsIcon size={22} />
+                        {autoDetectOrigin ? (
+                            <MapPin size={24} />
+                        ) : (
+                            <MapPinOff size={24} />
+                        )}
                     </button>
+                    <LanguageDropdown />
                 </div>
             </header>
             <div className='app-container'>
-                <div
-                    className={`app-settings-panel ${settingsOpen ? 'open' : ''}`}
-                >
-                    <Settings
-                        stations={stations}
-                        autoDetectOrigin={autoDetectOrigin}
-                        setAutoDetectOrigin={setAutoDetectOrigin}
-                        defaultDestId={defaultDestId}
-                        setDefaultDestId={setDefaultDestId}
-                        setDestId={setDestId}
-                    />
-                </div>
                 <main className='app-main'>
                     <div>
                         <span className='label-dim'>
@@ -99,7 +97,6 @@ function App() {
                             setOriginId={setOriginId}
                             destId={destId}
                             setDestId={setDestId}
-                            defaultDestId={defaultDestId}
                             autoDetectOrigin={autoDetectOrigin}
                         />
                     </div>
