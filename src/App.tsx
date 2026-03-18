@@ -127,10 +127,10 @@ function App() {
             </header>
             <div className='app-container'>
                 <main className='app-main'>
-                    <div>
-                        <span className='label-dim'>
+                    <section aria-labelledby='station-selector-heading'>
+                        <h2 id='station-selector-heading' className='label-dim'>
                             {t('app.selectRoute')}
-                        </span>
+                        </h2>
                         {stationsLoading ? (
                             <StationSelectorSkeleton />
                         ) : stationsError ? (
@@ -152,15 +152,15 @@ function App() {
                                 setDefaultDestId={setDefaultDestId}
                             />
                         )}
-                    </div>
+                    </section>
 
                     {stationsLoading && stationDebugFlags.showSkeleton ? (
-                        <div>
-                            <span className='label-dim'>
+                        <section aria-labelledby='train-list-heading'>
+                            <h2 id='train-list-heading' className='label-dim'>
                                 {t('app.selectTrain')}
-                            </span>
+                            </h2>
                             <TrainListSkeleton showLabel={false} />
-                        </div>
+                        </section>
                     ) : null}
 
                     {!stationsLoading && originId && destId && (

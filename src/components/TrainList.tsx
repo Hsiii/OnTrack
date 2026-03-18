@@ -227,8 +227,10 @@ export function TrainList({
     if (!originId || !destId) return null;
 
     return (
-        <div>
-            <span className='label-dim'>{t('app.selectTrain')}</span>
+        <section aria-labelledby='train-list-heading'>
+            <h2 id='train-list-heading' className='label-dim'>
+                {t('app.selectTrain')}
+            </h2>
 
             {error ? (
                 <div className='card-panel train-list-error'>
@@ -328,6 +330,6 @@ export function TrainList({
                     })}
                 </div>
             )}
-        </div>
+        </section>
     );
 }
