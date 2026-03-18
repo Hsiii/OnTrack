@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { MapPin, MapPinOff, Star } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { MapPin, MapPinCheck, MapPinOff, Star } from 'lucide-react';
 
 import { useI18n } from '../i18n';
 import type { Station } from '../types';
@@ -21,6 +21,7 @@ interface StationSelectorProps {
 }
 
 const CACHED_ORIGIN_KEY = 'ontrack_cached_origin';
+type OriginSelectionSource = 'manual' | 'cached' | 'geo' | null;
 
 export function StationSelector({
     stations,
@@ -44,6 +45,18 @@ export function StationSelector({
     const isGeolocationPending = useRef(false);
     const originIdRef = useRef(originId);
     const prevAutoDetectOrigin = useRef(autoDetectOrigin);
+    const [originSource, setOriginSource] = useState<OriginSelectionSource>(
+        () => (originId ? 'cached' : null)
+    );
+
+    const setOriginWithSource = useCallback(
+        (id: string, source: Exclude<OriginSelectionSource, null>) => {
+            setOriginId(id);
+            setOriginSource(id ? source : null);
+            localStorage.setItem(CACHED_ORIGIN_KEY, id);
+        },
+        [setOriginId]
+    );
 
     const showToast = (message: string) => {
         if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -102,7 +115,7 @@ export function StationSelector({
                 cachedOriginId &&
                 stations.find((s) => s.id === cachedOriginId)
             ) {
-                setOriginId(cachedOriginId);
+                setOriginWithSource(cachedOriginId, 'cached');
             }
             hasAutoSelected.current = true;
         };
@@ -135,11 +148,7 @@ export function StationSelector({
                             stations
                         );
 
-                        setOriginId(preferredStationId);
-                        localStorage.setItem(
-                            CACHED_ORIGIN_KEY,
-                            preferredStationId
-                        );
+                        setOriginWithSource(preferredStationId, 'geo');
                     }
                     hasAutoSelected.current = true;
                 },
@@ -184,15 +193,22 @@ export function StationSelector({
             // Permissions API not supported — request directly
             requestGeolocation();
         }
-    }, [stations, setOriginId, autoDetectOrigin]);
+    }, [autoDetectOrigin, setOriginId, setOriginWithSource, stations]);
 
     const originStation = stations.find((s) => s.id === originId);
     const destStation = stations.find((s) => s.id === destId);
 
     const handleOriginSelect = (id: string) => {
-        setOriginId(id);
-        localStorage.setItem(CACHED_ORIGIN_KEY, id);
+        setOriginWithSource(id, 'manual');
     };
+
+    const geoToggleIcon = !autoDetectOrigin ? (
+        <MapPinOff />
+    ) : originSource === 'geo' ? (
+        <MapPinCheck />
+    ) : (
+        <MapPin />
+    );
 
     const handleOriginDropdownOpen = (isOpen: boolean) => {
         setOriginDropdownOpen(isOpen);
@@ -249,9 +265,6 @@ export function StationSelector({
                         placeholder={t('station.origin')}
                         title={t('station.selectOrigin')}
                         selectedStation={originStation}
-                        onCacheSelection={(id) =>
-                            localStorage.setItem(CACHED_ORIGIN_KEY, id)
-                        }
                         triggerAction={
                             <button
                                 type='button'
@@ -263,7 +276,7 @@ export function StationSelector({
                                         : t('app.enableAutoDetectOrigin')
                                 }
                             >
-                                {autoDetectOrigin ? <MapPin /> : <MapPinOff />}
+                                {geoToggleIcon}
                             </button>
                         }
                     />
