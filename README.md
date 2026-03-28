@@ -16,12 +16,12 @@ A simple way to share Taiwan Railway arrival times with friends and family in on
 
 ### iOS (Safari)
 
-1. Open the app in Safari on [hsi-on-track.vercel.app](https://hsi-on-track.vercel.app/)
+1. Open the app in Safari on [ontrack.hsichen.dev](https://ontrack.hsichen.dev/)
 2. Tap the share button (bottom center)
 3. Select "Add to Home Screen"
 
 ### Android (Chrome)
 
-1. Open the app in Chrome on [hsi-on-track.vercel.app](https://hsi-on-track.vercel.app/)
+1. Open the app in Chrome on [ontrack.hsichen.dev](https://ontrack.hsichen.dev/)
 2. Tap the ⋮ menu (top right)
 3. Select "Add to Home screen" or "Install app"
